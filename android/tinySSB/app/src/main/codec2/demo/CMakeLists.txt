@@ -1,6 +1,5 @@
 add_definitions(-DFLOATING_POINT -DVAR_ARRAYS)
-include_directories(../src)
-
+include_directories("/Users/larsschneider/Desktop/Studium/Vorlesungen/FS24/DPI/Projekt/BattleShips/BattleShipSSB/android/tinySSB/app/src/main/codec2/demo/../src")
 # add_executable(c2demo c2demo.c)
 # target_link_libraries(c2demo codec2)
 # add_executable(freedv_700d_tx freedv_700d_tx.c)
