@@ -22,7 +22,8 @@ var scenarioDisplay = {
     'members': ['div:back', 'core', 'lst:members', 'div:confirm-members'],
     'settings': ['div:back', 'div:settings', 'core'],
     'kanban': ['div:qr', 'core', 'lst:kanban', 'div:footer', 'plus'],
-    'board': ['div:back', 'core', 'div:board']
+    'board': ['div:back', 'core', 'div:board'],
+    'duels': ['div:back', 'core', 'div:duels']
 }
 
 var scenarioMenu = {
@@ -56,6 +57,7 @@ var scenarioMenu = {
         ['(un)Forget', 'menu_forget_conv'],
         ['Settings', 'menu_settings'],
         ['About', 'menu_about']],
+        ['Current Duels', 'show_duels'] // BATTLESHIP ADDED
     'members': [['Settings', 'menu_settings'],
         ['About', 'menu_about']],
 
@@ -218,6 +220,14 @@ function menu_settings() {
 
     document.getElementById("tremolaTitle").style.display = 'none';
     */
+    var c = document.getElementById("conversationTitle");
+    c.style.display = null;
+    c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Settings</strong></font></div>";
+}
+
+function show_duels() {
+    closeOverlay();
+    setScenario('settings')
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
     c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Settings</strong></font></div>";
