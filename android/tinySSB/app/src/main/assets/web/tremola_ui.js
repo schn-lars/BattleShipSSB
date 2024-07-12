@@ -8,7 +8,7 @@ var display_or_not = [
     'div:qr', 'div:back',
     'core', 'lst:chats', 'div:posts', 'lst:contacts', 'lst:members', 'the:connex',
     'lst:kanban', 'div:footer', 'div:textarea', 'div:confirm-members', 'plus',
-    'div:settings', 'div:board'
+    'div:settings', 'div:board', 'div:duels' // BATTLESHIP
 ];
 
 var prev_scenario = 'chats';
@@ -23,7 +23,7 @@ var scenarioDisplay = {
     'settings': ['div:back', 'div:settings', 'core'],
     'kanban': ['div:qr', 'core', 'lst:kanban', 'div:footer', 'plus'],
     'board': ['div:back', 'core', 'div:board'],
-    'duels': ['div:back', 'core', 'div:duels']
+    'duels': ['div:back', 'core', 'div:duels'] // BATTLESHIP
 }
 
 var scenarioMenu = {
@@ -56,12 +56,14 @@ var scenarioMenu = {
         ['Rename this chat', 'menu_edit_convname'],
         ['(un)Forget', 'menu_forget_conv'],
         ['Settings', 'menu_settings'],
-        ['About', 'menu_about']],
-        ['Current Duels', 'show_duels'] // BATTLESHIP ADDED
+        ['About', 'menu_about'], // BATTLESHIP ADDED
+        ['Current Duels', 'show_duels']],
     'members': [['Settings', 'menu_settings'],
         ['About', 'menu_about']],
 
     'settings': [],
+
+    'duels': [], // BATTLESHIP
 
     'kanban': [['New Kanban board', 'menu_new_board'],
         ['Invitations', 'menu_board_invitations'],
@@ -109,7 +111,7 @@ function onBackPressed() {
 }
 
 function setScenario(s) {
-    // console.log('setScenario ' + s)
+    //console.log('setScenario ' + s)
     closeOverlay();
     var lst = scenarioDisplay[s];
     if (lst) {
@@ -134,7 +136,7 @@ function setScenario(s) {
             document.getElementById('tremolaTitle').style.position = null;
         }
 
-        if (s == "posts" || s == "settings" || s == "board") {
+        if (s == "posts" || s == "settings" || s == "board" || s == "duels") {
             document.getElementById('tremolaTitle').style.display = 'none';
             document.getElementById('conversationTitle').style.display = null;
             // document.getElementById('plus').style.display = 'none';
@@ -171,7 +173,6 @@ function setScenario(s) {
                 menu_create_personal_board()
             }
         }
-
     }
 }
 
@@ -225,12 +226,17 @@ function menu_settings() {
     c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Settings</strong></font></div>";
 }
 
+/*
+*   This method should display the open duels.
+*/
 function show_duels() {
-    closeOverlay();
-    setScenario('settings')
+    //closeOverlay();
+    setScenario('duels')
+    // Loading html content from tremola.html
+    //document.getElementById("div:duels").style.display = 'block';
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
-    c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Settings</strong></font></div>";
+    c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Duels</strong></font></div>";
 }
 
 function closeOverlay() {
