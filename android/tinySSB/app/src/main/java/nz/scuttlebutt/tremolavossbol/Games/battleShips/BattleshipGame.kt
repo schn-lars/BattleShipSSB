@@ -1,5 +1,7 @@
 package nz.scuttlebutt.tremolavossbol.games.battleShips
 
+import nz.scuttlebutt.tremolavossbol.games.Game
+
 /**
  * The main class of the game. Everything can be managed through this class (hopefully). It is a
  * simple battleships implementation working asymmetrically without the enemy field.
@@ -18,7 +20,7 @@ package nz.scuttlebutt.tremolavossbol.games.battleShips
  *      8           ~   ~   ~   ~   ~   ~   ~   ~   ~   ~
  *      9           ~   ~   ~   ~   ~   ~   ~   ~   ~   ~
  */
-class BattleshipGame {
+class BattleshipGame : Game {
     private val DEFAULT_CONFIG =
         arrayOf(
             2,
@@ -27,10 +29,9 @@ class BattleshipGame {
             4,
             5
         )
-    private var gameState: GameState? =
-        null
-    private var running =
-        false
+    private var gameState: GameState? = null
+    override var state: nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates = nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates.STOPPED
+    override var isRunning: Boolean = false
 
     /**
      * This method defines the ships that will be used in the game. It takes an array of integers,
@@ -48,14 +49,13 @@ class BattleshipGame {
         turn: Boolean,
         ships: Array<Int> = DEFAULT_CONFIG
     ) {
-        if (running) return
+        if (isRunning) return
         gameState =
             GameState(
                 turn,
                 ships
             )
-        running =
-            true
+        isRunning = true;
     }
 
     /**
@@ -64,7 +64,7 @@ class BattleshipGame {
      * @return True if the enemy has won
      */
     fun enemyHasWon(): Boolean {
-        if (!running) return false
+        if (!isRunning) return false
         return gameState!!.enemyHasWon()
     }
 
@@ -72,17 +72,8 @@ class BattleshipGame {
      * Ends the currently running game deleting all information about it
      */
     fun endGame() {
-        running = false
+        isRunning = false;
         gameState = null
-    }
-
-    /**
-     * Check if the game is already running
-     *
-     * @return true if it is running
-     */
-    fun isRunning(): Boolean {
-        return running
     }
 
     /**
@@ -96,7 +87,7 @@ class BattleshipGame {
         y: Int,
         direction: Direction
     ): Boolean {
-        if (!running) return false
+        if (!isRunning) return false
         return gameState!!.placeShip(
             index,
             x,
@@ -116,7 +107,7 @@ class BattleshipGame {
         x: Int,
         y: Int
     ): Boolean {
-        if (!running) return false
+        if (!isRunning) return false
         return gameState!!.shoot(
             x,
             y
@@ -137,7 +128,7 @@ class BattleshipGame {
         x: Int,
         y: Int
     ): ShotOutcome {
-        if (!running) throw IllegalStateException("Game has not yet started")
+        if (!isRunning) throw IllegalStateException("Game has not yet started")
         return gameState!!.receiveShot(
             x,
             y
@@ -153,7 +144,7 @@ class BattleshipGame {
      * @param shotOutcome The outcome of the shot
      */
     fun shotOutcome(x: Int, y: Int, shotOutcome: ShotOutcome) {
-        if (!running) return
+        if (!isRunning) return
         gameState!!.shotOutcome(x, y, shotOutcome)
     }
 
@@ -167,7 +158,7 @@ class BattleshipGame {
      * @return Empty string if the game is not running, the serialized state otherwise
      */
     fun serialize(): String {
-        if (!running) return ""
+        if (!isRunning) return ""
         return gameState!!.serialize()
     }
 
@@ -178,7 +169,7 @@ class BattleshipGame {
      * @return Empty string if the game is not running
      */
     fun getShipPosition(): String {
-        if (!running) return ""
+        if (!isRunning) return ""
         return gameState!!.getShipPosition()
     }
 
@@ -209,5 +200,12 @@ class BattleshipGame {
      */
     fun shotsFiredWithOutcome(): MutableList<Pair<Position2D, ShotOutcome>> {
         return gameState!!.shotsFiredWithOutcome()
+    }
+
+
+    // Overwritten functions defined from interface.
+
+    override fun toString(): String {
+        return "BSH"
     }
 }

@@ -1,6 +1,6 @@
 package nz.scuttlebutt.tremolavossbol.tssb.games.battleships
 
-enum class GameState(val string: String) {
+enum class GameStates(val string: String) {
     STOPPED ("STOPPED"),
     INVITED ("INVITED"),
     WAITING ("WAITING"),
@@ -10,5 +10,12 @@ enum class GameState(val string: String) {
 
     override fun toString(): String {
         return this.string
+    }
+
+    /**
+     * This method returns, whether a given GameInstance is still ongoing.
+     */
+    fun isActive(): Boolean {
+        return (this == RUNNING || this == INVITED || this == WAITING)
     }
 }

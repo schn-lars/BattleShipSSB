@@ -22,20 +22,19 @@ import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_IAM
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_TEXTANDVOICE
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_KANBAN
 import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions.Companion.toBase64
-import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
-import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameState
 import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions.Companion.toHex
-import nz.scuttlebutt.tremolavossbol.crypto.SodiumAPI.Companion.sha256
+import nz.scuttlebutt.tremolavossbol.tssb.games.GamesHandler
+import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_GAMETEXT
 import org.json.JSONArray
 
 
 // pt 3 in https://betterprogramming.pub/5-android-webview-secrets-you-probably-didnt-know-b23f8a8b5a0c
 
-class WebAppInterface(val act: MainActivity, val webView: WebView) {
+class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandler: GamesHandler) {
 
     var frontend_ready = false
     val frontend_frontier = act.getSharedPreferences("frontend_frontier", Context.MODE_PRIVATE)
-    var battleshipHandler = BattleshipHandler()
+    var gamesHandler = gameHandler
 
     @JavascriptInterface
     fun onFrontendRequest(s: String) {
@@ -152,6 +151,7 @@ class WebAppInterface(val act: MainActivity, val webView: WebView) {
             }
             */
             "publ:post" -> { // publ:post tips txt voice
+                Log.d("publ:post", s)
                 val a = JSONArray(args[1])
                 val tips = ArrayList<String>(0)
                 for (i in 0..a.length()-1) {
@@ -251,49 +251,10 @@ class WebAppInterface(val act: MainActivity, val webView: WebView) {
                     "websocket_url" -> {act.settings!!.setWebsocketUrl(args[2])}
                 }
             }
-            "battleship" -> { // Handle battleship communication
-                when (args[1]) {
-                    "invite" -> {
-                        // args[2] = fid, args[3] = hashed Ships
-                        Log.d("BattleShips", "Inviting")
-                        if (!battleshipHandler.addGame(args[2])) {
-                            Log.d("Battleship Game Invite", "Game already created")
-                            return
-                        }
-                        if (!battleshipHandler.startGame(args[2], args[3], true)) {
-                            Log.d("Battleship Game Invite", "Ship Positions are not valid")
-                            return
-                        }
-                        battleshipHandler.setState(args[2], GameState.WAITING)
-                        // Send Invite as direct Chat Message
-                        // TODO encrypt the message with positions of ships
-                        val a = JSONArray(args[1])
-                        val tips = ArrayList<String>(0)
-                        for (i in 0..a.length()-1) {
-                            val s = (a[i] as JSONObject).toString()
-                            Log.d("battleship:invite", s)
-                            tips.add(s)
-                        }
-                        var t: String? = null
-                        if (args[2] != "null")
-                            t = Base64.decode(args[2], Base64.NO_WRAP).decodeToString()
-                        var v: ByteArray? = null
-                        if (args.size > 3 && args[3] != "null")
-                            v = Base64.decode(args[3], Base64.NO_WRAP)
-                        public_post_with_voice(tips, t, v)
-                        return
-                    }
-                    "hash" -> {
-                        if (battleshipHandler.getHash(args[2]) != null) {
-                            Log.d("Battleship Hash", "Hash for game already set")
-                            return
-                        }
-                        battleshipHandler.setHash(args[2], args[3])
-                    }
-                    else -> {
-                        Log.d("onFrontendRequest","unknown battleship command")
-                    }
-                }
+            "games" -> { // Handle battleship communication
+                //gamesHandler.processGameRequest(s)
+                Log.d("GAM - WebApp", s)
+                public_post_game_request(s.substring(6))
             }
             else -> {
                 Log.d("onFrontendRequest", "unknown")
@@ -329,6 +290,19 @@ class WebAppInterface(val act: MainActivity, val webView: WebView) {
         // add tips
         Bipf.list_append(lst, if (text == null) Bipf.mkNone() else Bipf.mkString(text))
         Bipf.list_append(lst, if (voice == null) Bipf.mkNone() else Bipf.mkBytes(voice))
+        val tst = Bipf.mkInt((System.currentTimeMillis() / 1000).toInt())
+        Log.d("wai", "send time is ${tst.getInt()}")
+        Bipf.list_append(lst, tst)
+        val body = Bipf.encode(lst)
+        if (body != null)
+            act.tinyNode.publish_public_content(body)
+    }
+
+    // BATTLESHIP
+    fun public_post_game_request(text: String?) {
+        val lst = Bipf.mkList()
+        Bipf.list_append(lst, TINYSSB_APP_GAMETEXT)
+        Bipf.list_append(lst, if (text == null) Bipf.mkNone() else Bipf.mkString(text))
         val tst = Bipf.mkInt((System.currentTimeMillis() / 1000).toInt())
         Log.d("wai", "send time is ${tst.getInt()}")
         Bipf.list_append(lst, tst)

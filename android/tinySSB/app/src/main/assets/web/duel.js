@@ -58,9 +58,13 @@ function duel_openDuels() {
 // Beispielhafte Funktionen für Duell-Interaktionen
 function inviteForDuel() {
     // Logik für den Start eines Duells
-    console.log('Invited battleship')
     closeDuelOverlay();
-    backend("battleship invite " + myId);
+    //var stringToEncode = "GAM_BSH_INV_" + myId;
+    var stringToEncode = "BSH INV " + myId;
+    console.log('Invited battleship', JSON.stringify(stringToEncode))
+    var encodedString = btoa(stringToEncode);
+    //backend("publ:post [] "+ encodedString + " null");
+    backend("games "+ encodedString);
 }
 
 function closeDuelOverlay() {

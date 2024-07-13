@@ -24,6 +24,7 @@ import nz.scuttlebutt.tremolavossbol.crypto.IdStore
 import nz.scuttlebutt.tremolavossbol.tssb.ble.BlePeers
 import nz.scuttlebutt.tremolavossbol.tssb.*
 import nz.scuttlebutt.tremolavossbol.tssb.ble.BluetoothEventListener
+import nz.scuttlebutt.tremolavossbol.tssb.games.GamesHandler
 import nz.scuttlebutt.tremolavossbol.utils.Bipf
 import nz.scuttlebutt.tremolavossbol.utils.Constants
 import tremolavossbol.R
@@ -39,6 +40,7 @@ class MainActivity : Activity() {
     // lateinit var tremolaState: TremolaState
     lateinit var idStore: IdStore
     lateinit var wai: WebAppInterface
+    lateinit var gamesHandler: GamesHandler
     lateinit var tinyIO: IO
     val tinyNode = Node(this)
     val tinyRepo = Repo(this)
@@ -92,7 +94,9 @@ class MainActivity : Activity() {
         Log.d("IDENTITY", "is ${idStore.identity.toRef()} (${idStore.identity.verifyKey})")
 
         val webView = findViewById<WebView>(R.id.webView)
-        wai = WebAppInterface(this, webView)
+        gamesHandler = GamesHandler()
+        webView.addJavascriptInterface(gamesHandler, "GameHandler")
+        wai = WebAppInterface(this, webView, gamesHandler)
         tinyIO = IO(this, wai)
         tinyGoset._include_key(idStore.identity.verifyKey) // make sure our local key is in
         tinyRepo.load()
@@ -126,6 +130,7 @@ class MainActivity : Activity() {
         */
         val webStorage = WebStorage.getInstance()
         webView.addJavascriptInterface(wai, "Android")
+        webView.addJavascriptInterface(gamesHandler, "GamesHandler")
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
 

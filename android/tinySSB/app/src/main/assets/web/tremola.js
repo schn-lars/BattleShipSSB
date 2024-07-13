@@ -824,6 +824,7 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         resetTremola()
         location.reload()
     } else if (cmdStr[0] == 'publ:post') {
+        // check if user is in gamescenario (interpret message as gamecommands)
         var draft = atob(cmdStr[2])
         cmdStr.splice(0, 2)
         console.log("CMD STRING", cmdStr)
@@ -866,6 +867,19 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         // console.log('e=', JSON.stringify(e))
         b2f_new_event(e)
         console.log(e)
+    } else if (cmdStr[0] == 'games') {
+        var draft = atob(cmdStr[1])
+        cmdStr.splice(0, 1)
+        console.log("GAM CMD-STRING", cmdStr)
+        var e = {
+            'header': {
+                'tst': Date.now(),
+                'ref': Math.floor(1000000 * Math.random()),
+                'fid': myId
+            },
+            'confid': {},
+            'public': ["GAM", atob(cmdStr[0]), null, Date.now()].concat(args)
+        }
     } else {
         // console.log('backend', JSON.stringify(cmdStr))
     }
@@ -1210,6 +1224,13 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                 }
             }
 
+        } else if (e.public[0] == "GAM") {
+            if (window.GamesHandler && typeof window.GamesHandler.onGameBackendEvent === 'function') {
+                window.GamesHandler.onGameBackendEvent(e.public[1]);
+            } else {
+                console.error("GamesHandler.onGameBackendEvent is not a function");
+            }
+            //Android.onGameBackendEvent(e.public);
         }
         persist();
         must_redraw = true;

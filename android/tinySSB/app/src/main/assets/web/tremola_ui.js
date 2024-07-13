@@ -13,6 +13,7 @@ var display_or_not = [
 
 var prev_scenario = 'chats';
 var curr_scenario = 'chats';
+var game_scenario = false;
 
 var scenarioDisplay = {
     'chats': ['div:qr', 'core', 'lst:chats', 'div:footer'], // 'plus' TODO reactivate when encrypted chats are implemented

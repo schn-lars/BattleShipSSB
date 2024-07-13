@@ -5,15 +5,32 @@ import nz.scuttlebutt.tremolavossbol.games.battleShips.Direction
 import nz.scuttlebutt.tremolavossbol.games.battleShips.Position2D
 import nz.scuttlebutt.tremolavossbol.games.battleShips.ShotOutcome
 import nz.scuttlebutt.tremolavossbol.crypto.SodiumAPI.Companion.sha256
-import kotlin.js.ExperimentalJsExport
+import nz.scuttlebutt.tremolavossbol.games.Game
+import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
+import nz.scuttlebutt.tremolavossbol.tssb.games.GameInstance
+import nz.scuttlebutt.tremolavossbol.tssb.games.GamesHandler
 
 /**
  * Represents the set of all Battleship games. Games are managed in a list of GameInstances.
  * Instances can be addressed with the fid and the getInstanceFromFid function.
  */
-class BattleshipHandler() {
-
+class BattleshipHandler(val gameHandler: GamesHandler) {
+    private val gamesHandler: GamesHandler = gameHandler
     private val instances: MutableList<GameInstance> = mutableListOf()
+
+    /**
+     * This is the main entry function, which parses the given String s to achieve the
+     * desired result. (Frontend-Requests)
+     */
+    fun handleRequest(s: String, game: GameInstance?) {
+        val args = s.split(" ")
+        when (args[2]) { // 0 = games, 1 = BSH
+            "INV" -> {
+                gamesHandler.addOwnGame("BSH", args[3]) // 3 = ownerFid
+
+            }
+        }
+    }
 
     /**
      * Returns the GameInstance with the specified fid. GameInstance is null if no game found.
@@ -21,21 +38,11 @@ class BattleshipHandler() {
     fun getInstanceFromFid(fid: String): GameInstance? {
         var instance: GameInstance? = null
         for (game in instances) {
-            if (fid == game.getFid()) {
+            if (fid == game.participantFid) {
                 instance = game
             }
         }
         return instance
-    }
-
-    // BattleShip Extension
-    @ExperimentalJsExport
-    fun getListOfGames(): Array<Array<String>> {
-        val array = Array(instances.size) { arrayOf<String>() }
-        for ((index, game) in instances.withIndex()) {
-            array[index] = arrayOf("${game.getFid()} ${game.getState()}")
-        }
-        return array
     }
 
 
@@ -45,16 +52,16 @@ class BattleshipHandler() {
      * @return Returns true if new game is added to list.
      *         Returns false if new game could not be added because game already exists.
      */
-    fun addGame(fid: String): Boolean {
-        if (getInstanceFromFid(fid) != null) {
+    /*fun addGame(fid: String): Boolean {
+        if (getInstanceFromFid(fid) != null && getInstanceFromFid(fid)!!.game is BattleshipGame) {
             Log.d("Battleship Game Creation", "Game with user already created")
             return false
         }
-        val gameInstance = GameInstance()
+        val gameInstance = GameInstance("BSH", fid)
         gameInstance.setFid(fid)
         instances.add(gameInstance)
         return true
-    }
+    }*/
 
     /**
      * Starts the Battleship game. Specified name is the opponent. Ship positions are specified in the following format:
@@ -67,12 +74,18 @@ class BattleshipHandler() {
             Log.d("Battleship Game Start", "Game not found")
             return false
         }
-        if (instance.game.isRunning()) {
+        if (instance.game!!.isRunning) {
             Log.d("Battleship Game Start", "Game to be started is already running")
             return false
         }
-        instance.setState(GameState.RUNNING)
-        instance.game.setupGame(shouldStart)
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Game Start", "Instance is not BSH-Game")
+            return false
+        }
+
+        instance.state = GameStates.RUNNING
+        bshGame.setupGame(shouldStart)
         val pos = shipPositions.split("~")
         for (i in pos.indices) {
             val xValue = pos[i][0].digitToInt()
@@ -80,22 +93,22 @@ class BattleshipHandler() {
             Log.d("Battleship place ships", "x: ${xValue} y: ${yValue} direction: ${pos[i].substring(2)}")
             when (pos[i].substring(2)) {
                 "UP" -> {
-                    if (!instance.game.placeShip(i, xValue, yValue, Direction.UP)) {
+                    if (!bshGame.placeShip(i, xValue, yValue, Direction.UP)) {
                         validPosition = false
                     }
                 }
                 "DOWN" -> {
-                    if (!instance.game.placeShip(i, xValue, yValue, Direction.DOWN)) {
+                    if (!bshGame.placeShip(i, xValue, yValue, Direction.DOWN)) {
                         validPosition = false
                     }
                 }
                 "LEFT" -> {
-                    if (!instance.game.placeShip(i, xValue, yValue, Direction.LEFT)) {
+                    if (!bshGame.placeShip(i, xValue, yValue, Direction.LEFT)) {
                         validPosition = false
                     }
                 }
                 "RIGHT" -> {
-                    if (!instance.game.placeShip(i, xValue, yValue, Direction.RIGHT)) {
+                    if (!bshGame.placeShip(i, xValue, yValue, Direction.RIGHT)) {
                         validPosition = false
                     }
                 }
@@ -114,7 +127,12 @@ class BattleshipHandler() {
             Log.d("Battleship Set Hash", "Game not found")
             return
         }
-        instance.game.setEnemyHash(hash)
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Set Hash", "Instance is not BSH-Game")
+            return
+        }
+        bshGame.setEnemyHash(hash)
     }
 
     /**
@@ -126,7 +144,12 @@ class BattleshipHandler() {
             Log.d("Battleship Get Hash", "Game not found")
             return null
         }
-        return instance.game.getEnemyHash()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Get Hash", "Instance is not BSH-Game")
+            return null
+        }
+        return bshGame.getEnemyHash()
     }
 
     /**
@@ -148,7 +171,12 @@ class BattleshipHandler() {
             Log.d("Battleship Shoot", "Wrong number of coordinates in Shot Position")
             return false
         }
-        return instance.game.shoot(position[0].digitToInt(), position[1].digitToInt())
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Shoot", "Instance is not BSH-Game")
+            return false
+        }
+        return bshGame.shoot(position[0].digitToInt(), position[1].digitToInt())
     }
 
     /**
@@ -170,7 +198,12 @@ class BattleshipHandler() {
             Log.d("Battleship Receive Shot", "Wrong number of coordinates in Shot Position")
             return ShotOutcome.MISS
         }
-        return instance.game.receiveShot(position[0].digitToInt(), position[1].digitToInt())
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Receive Shot", "Instance is not BSH-Game")
+            return ShotOutcome.MISS
+        }
+        return bshGame.receiveShot(position[0].digitToInt(), position[1].digitToInt())
     }
 
     /**
@@ -182,7 +215,12 @@ class BattleshipHandler() {
             Log.d("Battleship Check Enemy Win", "Game not found")
             return false
         }
-        return instance.game.enemyHasWon()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip checkEnemyWon", "Instance is not BSH-Game")
+            return false
+        }
+        return bshGame.enemyHasWon()
     }
 
     fun stopGame(fid: String) {
@@ -191,7 +229,12 @@ class BattleshipHandler() {
             Log.d("Battleship Stop Game", "Game not found")
             return
         }
-        instance.game.endGame()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip Stop Game", "Instance is not BSH-Game")
+            return
+        }
+        bshGame.endGame()
     }
 
     /**
@@ -203,17 +246,22 @@ class BattleshipHandler() {
             Log.d("Battleship Save Shot Outcome", "Game not found")
             return
         }
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip saveShotOutcome", "Instance is not BSH-Game")
+            return
+        }
         val xValue = msg[0].digitToInt()
         val yValue = msg[1].digitToInt()
         when (msg.substring(2)) {
             "MISS" -> {
-                instance.game.shotOutcome(xValue, yValue, ShotOutcome.MISS)
+                bshGame.shotOutcome(xValue, yValue, ShotOutcome.MISS)
             }
             "HIT" -> {
-                instance.game.shotOutcome(xValue, yValue, ShotOutcome.HIT)
+                bshGame.shotOutcome(xValue, yValue, ShotOutcome.HIT)
             }
             "SUNKEN" -> {
-                instance.game.shotOutcome(xValue, yValue, ShotOutcome.SUNKEN)
+                bshGame.shotOutcome(xValue, yValue, ShotOutcome.SUNKEN)
             }
         }
     }
@@ -229,7 +277,12 @@ class BattleshipHandler() {
             Log.d("Battleship Get Game State", "Game not found")
             return "STOPPED"
         }
-        return instance.getState().toString() + "^" + instance.game.serialize()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip serialize", "Instance is not BSH-Game")
+            return "STOPPED"
+        }
+        return instance.state.toString() + "^" + bshGame.serialize()
     }
 
     /**
@@ -243,7 +296,12 @@ class BattleshipHandler() {
             Log.d("Battleship Get Ship Position", "Game not found")
             return ""
         }
-        return instance.game.getShipPosition()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip getShipPosition", "Instance is not BSH-Game")
+            return ""
+        }
+        return bshGame.getShipPosition()
     }
 
     /**
@@ -256,7 +314,12 @@ class BattleshipHandler() {
             Log.d("Battleship Get Ship At Position", "Game not found")
             return arrayOf()
         }
-        return instance.game.getShipAtPosition(position[0].digitToInt(), position[1].digitToInt())
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip getShipAtPosition", "Instance is not BSH-Game")
+            return arrayOf()
+        }
+        return bshGame.getShipAtPosition(position[0].digitToInt(), position[1].digitToInt())
     }
 
     /**
@@ -271,9 +334,14 @@ class BattleshipHandler() {
             Log.d("Battleship Check Hash", "Game not found")
             return false
         }
-        return (String(shipPos.encodeToByteArray().sha256()) == instance.game.getEnemyHash()
+        val bshGame : Game? = instance.game
+        if (bshGame !is BattleshipGame) {
+            Log.d("Battlehip checkPositions", "Instance is not BSH-Game")
+            return false
+        }
+        return (String(shipPos.encodeToByteArray().sha256()) == bshGame.getEnemyHash()
                 && checkIfHitsLineUpWithEnemyPositions(
-            instance.game.shotsFiredWithOutcome(),
+            bshGame.shotsFiredWithOutcome(),
             shipPos
         ))
     }
@@ -281,13 +349,13 @@ class BattleshipHandler() {
     /**
      * Sets the state of the game specified by the fid.
      */
-    fun setState(fid: String, state: GameState) {
+    fun setState(fid: String, state: GameStates) {
         val instance = getInstanceFromFid(fid)
         if (instance == null) {
             Log.d("Battleship Set State", "Game not found")
             return
         }
-        instance.setState(state)
+        instance.state = state
     }
 
     /**
