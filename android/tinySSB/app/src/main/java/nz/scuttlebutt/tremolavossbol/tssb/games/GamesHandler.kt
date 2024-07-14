@@ -3,13 +3,14 @@ package nz.scuttlebutt.tremolavossbol.tssb.games
 import android.util.Log
 import android.webkit.JavascriptInterface
 import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
-import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions
 import android.util.Base64
+import nz.scuttlebutt.tremolavossbol.crypto.SSBid
 
 /**
  * This class distributes all requests regarding any games.
  */
-class GamesHandler() {
+class GamesHandler(identity: SSBid) {
+    var myId: SSBid = identity
     var count = 0
     private val instances: MutableList<GameInstance> = mutableListOf()
     // Currently selected game. Each client can only have one active at a time.
@@ -45,7 +46,7 @@ class GamesHandler() {
     }
 
     /**
-     * This method reacts to incoming game commands.
+     * This method reacts to incoming (from peers) game commands.
      */
     @JavascriptInterface
     fun onGameBackendEvent(s: String): String {
@@ -53,6 +54,18 @@ class GamesHandler() {
         val decodedBytes = Base64.decode(s, Base64.DEFAULT);
         val decodedString = String(decodedBytes)
         Log.d("GamesHandler Recv", decodedString);
+        val args = decodedString.split(" ")
+        when (args[0]) {
+            "BSH" -> {
+                if (battleshipHandler == null) {
+                    battleshipHandler = BattleshipHandler(this)
+                }
+                battleshipHandler!!.handleRequest(decodedString.substring(4), activeInstance)
+            }
+            else -> {
+                Log.d("GamesHandler", "Unknown Game")
+            }
+        }
         return ""
     }
 
@@ -65,7 +78,7 @@ class GamesHandler() {
      * You can always create a new game. Limitation only kicks in on participant's side.
      */
     fun addOwnGame(gameType: String, ownerFid: String): Int {
-        addInstanceToList(GameInstance(gameType, ownerFid))
+        addInstanceToList(GameInstance(gameType, ownerFid, myId))
         count++
         return instances.size
     }
@@ -74,12 +87,8 @@ class GamesHandler() {
      * This method delivers the list of all current games to the frontend on request.
      */
     @JavascriptInterface
-    fun createInstanceList(): Array<String> {
-        val array = Array(instances.size) { "" }
-        for ((index, game) in instances.withIndex()) {
-            array[index] = getInstanceDescriptor(game)
-        }
-        return array
+    fun createInstanceList(): String {
+        return instances.joinToString(separator = "$") { getInstanceDescriptor(it) }
         // TODO read out log to retrieve all games
     }
 
@@ -96,12 +105,12 @@ class GamesHandler() {
      */
     fun processGameRequest(s: String) {
         val args = s.split(" ")
-        when (args[1]) {
+        when (args[0]) {
             "BSH" -> {
                 if (battleshipHandler == null) {
                     battleshipHandler = BattleshipHandler(this)
                 }
-                battleshipHandler!!.handleRequest(s, activeInstance)
+                battleshipHandler!!.handleRequest(s.substring(4), activeInstance)
             }
             else -> {
                 Log.d("GamesHandler", "Unknown Game")

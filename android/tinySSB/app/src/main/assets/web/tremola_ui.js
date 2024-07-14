@@ -231,14 +231,91 @@ function menu_settings() {
 *   This method should display the open duels.
 */
 function show_duels() {
-    //closeOverlay();
-    setScenario('duels')
-    // Loading html content from tremola.html
-    //document.getElementById("div:duels").style.display = 'block';
+    setScenario('duels');
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
+
     c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Duels</strong></font></div>";
+    var container = document.getElementById("duels-container");
+    container.innerHTML = "";
+
+    console.log('show_duels ', JSON.stringify("gamelist before"));
+    var gameListString = "";
+
+    if (window.GamesHandler && typeof window.GamesHandler.createInstanceList === 'function') {
+        gameListString = window.GamesHandler.createInstanceList();
+        console.log('show_duels ', "gamelist received: ", gameListString);
+    } else {
+        console.error("GamesHandler.createInstanceList is not a function");
+    }
+
+    if (gameListString === "") {
+        console.log('show_duels ', JSON.stringify("No active duels found."));
+        var noDuelDiv = document.createElement("div");
+        noDuelDiv.innerHTML = "No active duels available.";
+        container.appendChild(noDuelDiv);
+    } else {
+        var gameList = gameListString.split('$');
+        gameList.forEach(function(game) {
+            var gameParts = game.split(" ");
+            var name = gameParts[0];
+            var owner = gameParts[1];
+            var participant = gameParts[2];
+            var startTime = gameParts[3];
+            var state = gameParts[4];
+            console.log('My Id: ', JSON.stringify(myId));
+            if (owner == myId) {
+                owner = "Me";
+                participant = id2b32(participant);
+            } else if (participant == myId) {
+                participant = "Me";
+                owner = id2b32(owner);
+            } else {
+                participant = id2b32(participant);
+                owner = id2b32(owner);
+            }
+            console.log('Game-Container for: ', JSON.stringify(name));
+
+            var gameDiv = document.createElement("div");
+            gameDiv.style.display = "flex";
+            gameDiv.style.alignItems = "center";
+            gameDiv.style.marginBottom = "10px";
+
+            if (name === "BSH") {
+                var img = document.createElement("img");
+                img.src = "android/tinySSB/app/src/main/assets/web/img/battleship.svg";
+                img.style.marginRight = "10px";
+                gameDiv.appendChild(img);
+            }
+
+            var textDiv = document.createElement("div");
+            textDiv.style.flexGrow = "1";
+            var text = document.createElement("textarea");
+            text.rows = 3;
+            text.value = `Owner: ${owner}\nParticipant: ${participant}\nStart Time: ${startTime}`;
+            text.style.width = "100%";
+            textDiv.appendChild(text);
+
+            var button = document.createElement("button");
+            button.innerText = state;
+            button.style.marginLeft = "10px";
+            button.onclick = function() {
+                onDuelButtonClicked(game);
+            };
+
+            gameDiv.appendChild(textDiv);
+            gameDiv.appendChild(button);
+
+            container.appendChild(gameDiv);
+        });
+    }
 }
+
+function onDuelButtonClicked(duelString) {
+  console.log("Button clicked for: " + JSON.stringify(duelString));
+  // Hier kannst du den Code hinzufügen, der ausgeführt werden soll, wenn der Knopf gedrückt wird
+}
+
 
 function closeOverlay() {
     document.getElementById('menu').style.display = 'none';

@@ -94,7 +94,7 @@ class MainActivity : Activity() {
         Log.d("IDENTITY", "is ${idStore.identity.toRef()} (${idStore.identity.verifyKey})")
 
         val webView = findViewById<WebView>(R.id.webView)
-        gamesHandler = GamesHandler()
+        gamesHandler = GamesHandler(idStore.identity)
         webView.addJavascriptInterface(gamesHandler, "GameHandler")
         wai = WebAppInterface(this, webView, gamesHandler)
         tinyIO = IO(this, wai)

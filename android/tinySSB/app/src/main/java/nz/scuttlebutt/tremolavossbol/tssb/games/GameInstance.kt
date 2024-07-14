@@ -1,6 +1,7 @@
 package nz.scuttlebutt.tremolavossbol.tssb.games
 
 import android.util.Log
+import nz.scuttlebutt.tremolavossbol.crypto.SSBid
 import nz.scuttlebutt.tremolavossbol.games.Game
 import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
 import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
@@ -9,7 +10,8 @@ import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
  * This class represents a Instance of a Battleship game. The peerfid is the ID of the opponent.
  * The state marks the progress in the game. STOPPED is the default state.
  */
-class GameInstance(gameType: String, fid: String) {
+class GameInstance(gameType: String, fid: String, identity: SSBid) {
+    var myId: SSBid = identity
     var game : Game? = null
     var participantFid : String = "-"
     var ownerFid : String = "-"

@@ -252,8 +252,8 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                 }
             }
             "games" -> { // Handle battleship communication
-                //gamesHandler.processGameRequest(s)
                 Log.d("GAM - WebApp", s)
+                //gamesHandler.processGameRequest(s.substring(6))
                 public_post_game_request(s.substring(6))
             }
             else -> {

@@ -5,10 +5,10 @@ function duel_openDuels() {
 
     var duelContainer = document.getElementById('duelContainer');
     if (duelContainer) {
-            duelContainer.style.display = 'block'; // Overlay sichtbar machen
-        } else {
-            console.error('Duel-Container not found!');
-        }
+        duelContainer.style.display = 'block'; // Overlay sichtbar machen
+    } else {
+        console.error('Duel-Container not found!');
+    }
 }
 
 // Beispielhafte Funktionen für Duell-Interaktionen

@@ -1,6 +1,7 @@
 package nz.scuttlebutt.tremolavossbol.tssb.games.battleships
 
 import android.util.Log
+import android.webkit.JavascriptInterface
 import nz.scuttlebutt.tremolavossbol.games.battleShips.Direction
 import nz.scuttlebutt.tremolavossbol.games.battleShips.Position2D
 import nz.scuttlebutt.tremolavossbol.games.battleShips.ShotOutcome
@@ -9,6 +10,7 @@ import nz.scuttlebutt.tremolavossbol.games.Game
 import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
 import nz.scuttlebutt.tremolavossbol.tssb.games.GameInstance
 import nz.scuttlebutt.tremolavossbol.tssb.games.GamesHandler
+import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions.Companion.deRef
 
 /**
  * Represents the set of all Battleship games. Games are managed in a list of GameInstances.
@@ -23,11 +25,24 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
      * desired result. (Frontend-Requests)
      */
     fun handleRequest(s: String, game: GameInstance?) {
+        Log.d("BSH Handler", s)
         val args = s.split(" ")
-        when (args[2]) { // 0 = games, 1 = BSH
+        when (args[0]) { // 0 = games, 1 = BSH
             "INV" -> {
-                gamesHandler.addOwnGame("BSH", args[3]) // 3 = ownerFid
-
+                val id = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
+                gamesHandler.addOwnGame("BSH", id)
+                Log.d("BSH-Handler", "Added new gameInstance $id")
+            }
+            "INVACC" -> {
+                val ownerID = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
+                val peerID = args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")
+                val inst = getInstanceFromFids(ownerID, peerID)
+                if (inst != null) {
+                    // Todo send O.Ship#
+                }
+            }
+            else -> {
+                Log.e("BSH Handler", s)
             }
         }
     }
@@ -43,6 +58,15 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
             }
         }
         return instance
+    }
+
+    private fun getInstanceFromFids(oID: String, pID: String): GameInstance? {
+        for (game in instances) {
+            if (game.ownerFid == oID && game.participantFid == pID) {
+                return game
+            }
+        }
+        return null
     }
 
 
