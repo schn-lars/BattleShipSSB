@@ -6,6 +6,7 @@ enum class GameStates(val string: String) {
     WAITING ("WAITING"),
     WON ("WON"),
     LOST ("LOST"),
+    SPEC ("SPECTATE"),
     RUNNING ("RUNNING");
 
     override fun toString(): String {

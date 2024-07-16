@@ -13,6 +13,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.google.zxing.integration.android.IntentIntegrator
+import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
 import org.json.JSONObject
 
 
@@ -40,7 +41,7 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
     fun onFrontendRequest(s: String) {
         //handle the data captured from webview}
         Log.d("FrontendRequest", s)
-        val args = s.split(" ")
+        var args = s.split(" ")
         when (args[0]) {
             "onBackPressed" -> {
                 (act as MainActivity)._onBackPressed()
@@ -254,6 +255,32 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
             "games" -> { // Handle battleship communication
                 Log.d("GAM - WebApp", s)
                 //gamesHandler.processGameRequest(s.substring(6))
+                // TODO here you can add restrictions, if a command is not allowed
+                // TODO -> INVACC <OID> <PID> <ADD HASH>
+                val msg = Base64.decode(args[1], Base64.NO_WRAP).decodeToString()
+                args = msg.split(' ')
+                Log.d("new Args", args.toString())
+                if (args.size > 4) {
+                    if (args[1] == "BSH" && args[2] == "INVACC") {
+                        val inst = gameHandler.getInstanceFromFids("BSH", args[3], args[4])
+                        // Creating game with ships placed
+                        (inst!!.game as BattleshipGame).setupGame(false)
+                        val peerHash = (inst.game as BattleshipGame).getShipPosition()
+                        val msg = "$s $peerHash" // Appending Peer's Shiphash
+                        Log.d("GAM APP (INVACC)", msg)
+                        public_post_game_request(msg.substring(6))
+                        return
+                    }
+                } else if (args[1] == "INV") {
+                    //Log.d("INV Keys", "${gamesHandler.myId.toRef()} ${args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")}")
+                    gamesHandler.addOwnGame(args[0], args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519"))
+                    val inst = gamesHandler.getInstanceFromFid(args[0], args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519"))
+                    (inst!!.game as BattleshipGame).setupGame(true)
+                    val hash = (inst.game as BattleshipGame).getShipPosition()
+                    val req = "${args[0]} INV ${args[2]} $hash"
+                    public_post_game_request(Base64.encodeToString(req.toByteArray(), Base64.NO_WRAP))
+                    return
+                }
                 public_post_game_request(s.substring(6))
             }
             else -> {

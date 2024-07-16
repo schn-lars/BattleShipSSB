@@ -880,6 +880,7 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
             'confid': {},
             'public': ["GAM", atob(cmdStr[0]), null, Date.now()].concat(args)
         }
+        b2f_new_event(e)
     } else {
         // console.log('backend', JSON.stringify(cmdStr))
     }
@@ -1225,8 +1226,12 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
             }
 
         } else if (e.public[0] == "GAM") {
+        // TODO autoretransmit answer if necessary
             if (window.GamesHandler && typeof window.GamesHandler.onGameBackendEvent === 'function') {
-                window.GamesHandler.onGameBackendEvent(e.public[1]);
+                var response = window.GamesHandler.onGameBackendEvent(e.public[1]);
+                if (response != "") {
+                    backend(response);
+                }
             } else {
                 console.error("GamesHandler.onGameBackendEvent is not a function");
             }

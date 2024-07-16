@@ -2,7 +2,7 @@ package nz.scuttlebutt.tremolavossbol.games.battleShips
 
 import android.util.Log
 
-class MoveValidator {
+class  MoveValidator {
 
     /**
      * Checks if an outgoing shot is out of bounds of the board or a duplicate

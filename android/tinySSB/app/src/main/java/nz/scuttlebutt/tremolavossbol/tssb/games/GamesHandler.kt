@@ -6,6 +6,7 @@ import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
 import android.util.Base64
 import nz.scuttlebutt.tremolavossbol.crypto.SSBid
 
+
 /**
  * This class distributes all requests regarding any games.
  */
@@ -31,6 +32,30 @@ class GamesHandler(identity: SSBid) {
             }
         }
         return true
+    }
+
+    /**
+     * Returns an instance of a game (if exist) for given parameters.
+     */
+    fun getInstanceFromFids(gameType: String, oID: String, pID: String): GameInstance? {
+        for (game in instances) {
+            if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType) {
+                return game
+            }
+        }
+        return null
+    }
+
+    /**
+     * This method is used to get an instance after receiving an invite.
+     */
+    fun getInstanceFromFid(gameType: String, oID: String): GameInstance? {
+        for (game in instances) {
+            if (game.ownerFid == oID && game.game.toString() == gameType && game.participantFid == "-") {
+                return game
+            }
+        }
+        return null
     }
 
     /**
@@ -60,13 +85,13 @@ class GamesHandler(identity: SSBid) {
                 if (battleshipHandler == null) {
                     battleshipHandler = BattleshipHandler(this)
                 }
-                battleshipHandler!!.handleRequest(decodedString.substring(4), activeInstance)
+                return battleshipHandler!!.handleRequest(decodedString.substring(4), activeInstance)
             }
             else -> {
                 Log.d("GamesHandler", "Unknown Game")
+                return ""
             }
         }
-        return ""
     }
 
     private fun getInstanceDescriptor(i: GameInstance): String {
@@ -100,21 +125,13 @@ class GamesHandler(identity: SSBid) {
         instances.add(instance)
     }
 
-    /**
-     * This method is responsible for transmitting the given parameter to the correct game.
-     */
-    fun processGameRequest(s: String) {
-        val args = s.split(" ")
-        when (args[0]) {
-            "BSH" -> {
-                if (battleshipHandler == null) {
-                    battleshipHandler = BattleshipHandler(this)
-                }
-                battleshipHandler!!.handleRequest(s.substring(4), activeInstance)
-            }
-            else -> {
-                Log.d("GamesHandler", "Unknown Game")
-            }
-        }
+    fun answerPeerRequest(s: String) {
+        //public_post_game_request(s)
     }
+
+    fun isIdEqualToMine(id: String): Boolean {
+        return myId.toString() == id
+    }
+
+
 }

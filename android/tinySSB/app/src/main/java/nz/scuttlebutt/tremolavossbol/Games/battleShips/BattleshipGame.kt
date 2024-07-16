@@ -1,6 +1,8 @@
 package nz.scuttlebutt.tremolavossbol.games.battleShips
 
 import nz.scuttlebutt.tremolavossbol.games.Game
+import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
+import kotlin.random.Random
 
 /**
  * The main class of the game. Everything can be managed through this class (hopefully). It is a
@@ -29,8 +31,8 @@ class BattleshipGame : Game {
             4,
             5
         )
-    private var gameState: GameState? = null
-    override var state: nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates = nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates.STOPPED
+    var gameState: GameState? = null
+    override var state: GameStates = GameStates.STOPPED
     override var isRunning: Boolean = false
 
     /**
@@ -56,6 +58,17 @@ class BattleshipGame : Game {
                 ships
             )
         isRunning = true;
+        // Randomly placing the ships. Makes is more convenient.
+        for (i in ships.indices) {
+            var direction = Direction.values().random()
+            var x = Random.nextInt(0,10);
+            var y = Random.nextInt(0,10)
+            while (!placeShip(i,x,y, direction)) {
+                direction = Direction.values().random()
+                x = Random.nextInt(0,10);
+                y = Random.nextInt(0,10)
+            }
+        }
     }
 
     /**
@@ -129,10 +142,14 @@ class BattleshipGame : Game {
         y: Int
     ): ShotOutcome {
         if (!isRunning) throw IllegalStateException("Game has not yet started")
-        return gameState!!.receiveShot(
-            x,
-            y
-        )
+        try {
+            return gameState!!.receiveShot(
+                x,
+                y
+            )
+        } catch (e: Exception) {
+            throw IllegalStateException("It is your turn")
+        }
     }
 
     /**
@@ -158,7 +175,6 @@ class BattleshipGame : Game {
      * @return Empty string if the game is not running, the serialized state otherwise
      */
     fun serialize(): String {
-        if (!isRunning) return ""
         return gameState!!.serialize()
     }
 
@@ -171,20 +187,6 @@ class BattleshipGame : Game {
     fun getShipPosition(): String {
         if (!isRunning) return ""
         return gameState!!.getShipPosition()
-    }
-
-    /**
-     * Setter for the hash of enemy positions
-     */
-    fun setEnemyHash(hash: String) {
-        gameState!!.setEnemyHash(hash)
-    }
-
-    /**
-     * Getter for the hash of enemy positions
-     */
-    fun getEnemyHash(): String? {
-        return gameState!!.getEnemyHash()
     }
 
     /**

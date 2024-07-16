@@ -7,7 +7,7 @@ package nz.scuttlebutt.tremolavossbol.games.battleShips
  * @param shipSizes An array of all the boat sizes
  */
 class GameState(
-    private var turn: Boolean,
+    var turn: Boolean,
     shipSizes: Array<Int>
 ) {
     private val ships =
@@ -18,15 +18,15 @@ class GameState(
                 shipSizes[i]
             )
         }
-    private val shotsFired =
+    val shotsFired =
         mutableListOf<Position2D>()
-    private val shotReceived =
+    val shotReceived =
         mutableListOf<Pair<Position2D, ShotOutcome>>()
-    private val shotsFiredWithOutcome =
+    val shotsFiredWithOutcome =
         mutableListOf<Pair<Position2D, ShotOutcome>>()
-    private val moveValidator =
+    val moveValidator =
         MoveValidator()
-    private var enemyHash: String? = null
+    var enemyHash: String? = null
 
 
     /**
@@ -108,6 +108,9 @@ class GameState(
         x: Int,
         y: Int
     ): ShotOutcome {
+        if (!turn) {
+
+        }
         turn = true
         for (ship in ships) {
             when (ship.isHit(
@@ -204,15 +207,11 @@ class GameState(
         return state.toString()
     }
 
-    fun setEnemyHash(hash: String) {
-        enemyHash = hash
-    }
-
-    fun getEnemyHash(): String? {
-        return enemyHash
-    }
-
     fun shotsFiredWithOutcome(): MutableList<Pair<Position2D, ShotOutcome>> {
         return shotsFiredWithOutcome
+    }
+
+    fun isMyTurn(): Boolean {
+        return turn
     }
 }
