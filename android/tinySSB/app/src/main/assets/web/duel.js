@@ -12,7 +12,7 @@ function duel_openDuels() {
 }
 
 // Beispielhafte Funktionen für Duell-Interaktionen
-function inviteForDuel() {
+function inviteForDuel(gameType) {
     // Logik für den Start eines Duells
     closeDuelOverlay();
     //var stringToEncode = "GAM_BSH_INV_" + myId;
