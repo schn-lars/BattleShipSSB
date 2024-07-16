@@ -3,12 +3,12 @@
 function duel_openDuels() {
     closeOverlay(); // Schließe andere Overlays
 
-    var duelContainer = document.getElementById('duelContainer');
-    if (duelContainer) {
-        duelContainer.style.display = 'block'; // Overlay sichtbar machen
-    } else {
-        console.error('Duel-Container not found!');
-    }
+    var duelInviteContainer = document.getElementById('duelInviteContainer');
+    if (duelInviteContainer) {
+            duelInviteContainer.style.display = 'block'; // Overlay sichtbar machen
+        } else {
+            console.error('Duel-Invite-Container not found!');
+        }
 }
 
 // Beispielhafte Funktionen für Duell-Interaktionen
@@ -24,9 +24,9 @@ function inviteForDuel() {
 }
 
 function closeDuelOverlay() {
-    var duelContainer = document.getElementById('duelContainer');
-    if (duelContainer) {
-        //duelContainer.parentNode.removeChild(duelContainer);
-        duelContainer.style.display = 'none';
+    var duelInviteContainer = document.getElementById('duelInviteContainer');
+    if (duelInviteContainer) {
+        //duelInviteContainer.parentNode.removeChild(duelInviteContainer);
+        duelInviteContainer.style.display = 'none';
     }
 }
