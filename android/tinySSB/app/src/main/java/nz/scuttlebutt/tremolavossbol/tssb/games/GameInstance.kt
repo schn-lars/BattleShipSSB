@@ -15,7 +15,7 @@ class GameInstance(gameType: String, fid: String, identity: SSBid) {
     var game : Game? = null
     var participantFid : String = "-"
     var ownerFid : String = "-"
-    var startTime : Int = 0
+    var startTime : Long = 0
     var state : GameStates = GameStates.STOPPED
 
     init {

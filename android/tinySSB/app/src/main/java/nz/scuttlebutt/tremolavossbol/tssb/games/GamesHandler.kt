@@ -6,6 +6,8 @@ import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
 import android.util.Base64
 import nz.scuttlebutt.tremolavossbol.crypto.SSBid
 import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
+import java.text.SimpleDateFormat
+import java.util.Date
 
 
 /**
@@ -97,6 +99,10 @@ class GamesHandler(identity: SSBid) {
 
     private fun getInstanceDescriptor(i: GameInstance): String {
         var myTurn: String = "0"
+
+        val currentTime = System.currentTimeMillis()
+        i.startTime = currentTime;
+
         if ((i.game as BattleshipGame).gameState == null) {
             return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state}"
         }

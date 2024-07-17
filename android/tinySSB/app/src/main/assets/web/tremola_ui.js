@@ -261,7 +261,8 @@ function show_duels() {
             var name = gameParts[0];
             var owner = gameParts[1];
             var participant = gameParts[2];
-            var startTime = gameParts[3];
+            var currentTime = gameParts[3];
+            val startTime = SimpleDateFormat("EEEE, MMMM d, yyyy HH:mm:ss a").format(Date(currentTime))
             var state = gameParts[4];
             console.log('My Id: ', JSON.stringify(myId));
             if (owner == myId) {
