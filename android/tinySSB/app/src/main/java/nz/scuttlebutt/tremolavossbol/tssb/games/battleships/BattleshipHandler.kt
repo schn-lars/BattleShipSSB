@@ -106,6 +106,10 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                         } catch (e: IllegalStateException) {
                             return "games BSH SHOTDEC $ownerID $peerID"
                         }
+                        if ((inst.game as BattleshipGame).gameState!!.enemyHasWon()) {
+                            (inst.game as BattleshipGame).state = GameStates.LOST
+                            return "games BSH DUELWON $ownerID $peerID 0"
+                        }
                         return "games BSH SHOTACC $ownerID $peerID $isPeer $x$y $outcome"
                     }
                 } else if (gamesHandler.isIdEqualToMine(peerID) && isPeer == "0") { // i am peer, owner sent
@@ -116,12 +120,16 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                         } catch (e: IllegalStateException) {
                             return "games BSH SHOTDEC $ownerID $peerID"
                         }
+                        if ((inst.game as BattleshipGame).gameState!!.enemyHasWon()) {
+                            (inst.game as BattleshipGame).state = GameStates.LOST
+                            return "games BSH DUELWON $ownerID $peerID 1"
+                        }
                         return "games BSH SHOTACC $ownerID $peerID $isPeer $x$y $outcome"
                     }
                 }
                 return ""
             }
-            "SHOTACC" -> { // OID PID isPeer Pos Outcome
+            "SHOTACC" -> { // OID PID isPeer Pos Outcome (ATBC)
                 val ownerID = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
                 val peerID = args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")
                 val inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
@@ -133,8 +141,13 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                         (inst.game as BattleshipGame).shotOutcome(x,y, outcome)
                     } else if (gamesHandler.isIdEqualToMine(peerID) && args[3] == "1" && outcome != null) {// Peer's shot
                         (inst.game as BattleshipGame).shotOutcome(x,y, outcome)
-                    } else {
+                    } else if (!gamesHandler.isIdEqualToMine(peerID) && !gamesHandler.isIdEqualToMine(ownerID)) { // Im neither owner nor peer
                         // TODO participantShots, ownerShots for spectator
+                        if (args[3] == "1" && outcome != null) {
+                            (inst.game as BattleshipGame).registerSpectatorPeer(x,y, outcome)
+                        } else if (args[3] == "0" && outcome != null) {
+                            (inst.game as BattleshipGame).registerSpectatorOwner(x,y, outcome)
+                        }
                     }
                 }
                 return ""
@@ -143,12 +156,53 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                 // Turn wieder auf True machen
                 val ownerID = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
                 val peerID = args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")
-                if (gamesHandler.isIdEqualToMine(peerID)) {
-                    var inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
+                var inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
+                if (gamesHandler.isIdEqualToMine(peerID) && args[3] == "1") { // It was Peer's shot
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.SPEC
+                        (inst.game as BattleshipGame).gameState!!.turn = true
+                    }
+                } else if (gamesHandler.isIdEqualToMine(ownerID) && args[3] == "0") { // It was Owner's shot
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).gameState!!.turn = true
                     }
                 }
+                return ""
+            }
+            "DUELWON" -> {
+                val ownerID = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
+                val peerID = args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")
+                val isPeer = args[3]
+                val inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
+                if (gamesHandler.isIdEqualToMine(ownerID) && isPeer == "1") { // Owner Won
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).state = GameStates.WON
+                    }
+                } else if (gamesHandler.isIdEqualToMine(peerID) && isPeer == "0") { // Peer has won
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).state = GameStates.WON
+                    }
+                }
+                return ""
+            }
+            "DUELQUIT" -> {
+                val ownerID = args[1].slice(1..args[1].lastIndex).removeSuffix(".ed25519")
+                val peerID = args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")
+                val isPeer = args[3]
+                val inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
+                if (gamesHandler.isIdEqualToMine(ownerID) && isPeer == "1") { // Owner Quit
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                    }
+                } else if (gamesHandler.isIdEqualToMine(peerID) && isPeer == "0") { // Peer Quit
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                    }
+                } else {
+                    if (inst != null) {
+                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                    }
+                }
+
                 return ""
             }
             else -> {

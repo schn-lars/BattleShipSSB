@@ -210,4 +210,18 @@ class BattleshipGame : Game {
     override fun toString(): String {
         return "BSH"
     }
+
+    /**
+     * This method registers ACK'd moves of the Owner. This is later useful to spectate a game.
+     */
+    fun registerSpectatorOwner(x: Int, y: Int, outcome: ShotOutcome) {
+        gameState!!.shotsFiredWithOutcome.add(Pair(Position2D(x,y), outcome))
+    }
+
+    /**
+     * This method registers ACK'd moves of the Peer. This is later useful to spectate a game.
+     */
+    fun registerSpectatorPeer(x: Int, y: Int, outcome: ShotOutcome) {
+        gameState!!.shotReceived.add(Pair(Position2D(x,y), outcome))
+    }
 }

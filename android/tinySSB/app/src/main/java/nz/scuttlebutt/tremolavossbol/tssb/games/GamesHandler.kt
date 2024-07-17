@@ -130,7 +130,7 @@ class GamesHandler(identity: SSBid) {
     }
 
     fun isIdEqualToMine(id: String): Boolean {
-        return myId.toString() == id
+        return myId.toRef() == id
     }
 
 

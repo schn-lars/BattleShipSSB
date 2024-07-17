@@ -1,5 +1,13 @@
 "use strict";
 
+let battleships_turn = false
+let battleships_placed_ships = 0
+let battleships_horizontal = true
+let battleships_ship_positions = ""
+let battleship_ship_lengths = [2, 3, 3, 4 ,5]
+let battleship_status = "stopped"
+
+
 function duel_openDuels() {
     closeOverlay(); // Schließe andere Overlays
 
