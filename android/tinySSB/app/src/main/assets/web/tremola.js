@@ -1230,6 +1230,11 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
             if (window.GamesHandler && typeof window.GamesHandler.onGameBackendEvent === 'function') {
                 var response = window.GamesHandler.onGameBackendEvent(e.public[1]);
                 if (response != "") {
+                    // TODO anpassen von GUI
+                    var req = response.split(' ');
+                    if (req[0] == "GUI") {
+                        update_game_gui(req);
+                    }
                     backend(response);
                 }
             } else {

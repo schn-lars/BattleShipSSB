@@ -5,6 +5,7 @@ import android.webkit.JavascriptInterface
 import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
 import android.util.Base64
 import nz.scuttlebutt.tremolavossbol.crypto.SSBid
+import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
 
 
 /**
@@ -95,7 +96,14 @@ class GamesHandler(identity: SSBid) {
     }
 
     private fun getInstanceDescriptor(i: GameInstance): String {
-        return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state}"
+        var myTurn: String = "0"
+        if ((i.game as BattleshipGame).gameState == null) {
+            return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state}"
+        }
+        if ((i.game as BattleshipGame).gameState?.isMyTurn() == true) {
+            myTurn = "1";
+        }
+        return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state} $myTurn"
     }
 
     /**

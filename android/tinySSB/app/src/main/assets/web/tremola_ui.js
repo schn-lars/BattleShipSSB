@@ -334,6 +334,7 @@ function show_duels() {
 
 function onDuelButtonClicked(duelString) {
   console.log("Button clicked for: " + JSON.stringify(duelString));
+  battleship();
   // Hier kannst du den Code hinzufügen, der ausgeführt werden soll, wenn der Knopf gedrückt wird
 }
 
