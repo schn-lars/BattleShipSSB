@@ -10,7 +10,7 @@ import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
  * This class represents a Instance of a Battleship game. The peerfid is the ID of the opponent.
  * The state marks the progress in the game. STOPPED is the default state.
  */
-class GameInstance(gameType: String, fid: String, identity: SSBid) {
+class GameInstance(gameType: String, fid: String, identity: SSBid, time: Long) {
     var myId: SSBid = identity
     var game : Game? = null
     var participantFid : String = "-"
@@ -20,6 +20,7 @@ class GameInstance(gameType: String, fid: String, identity: SSBid) {
 
     init {
         ownerFid = fid
+        startTime = time
         game = createGameInstance(gameType)
         if (game == null) {
             Log.d("GameInstance", "Unknown Game.");

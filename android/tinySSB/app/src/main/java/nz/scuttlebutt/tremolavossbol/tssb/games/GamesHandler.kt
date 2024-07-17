@@ -100,9 +100,6 @@ class GamesHandler(identity: SSBid) {
     private fun getInstanceDescriptor(i: GameInstance): String {
         var myTurn: String = "0"
 
-        val currentTime = System.currentTimeMillis()
-        i.startTime = currentTime;
-
         if ((i.game as BattleshipGame).gameState == null) {
             return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state}"
         }
@@ -117,7 +114,8 @@ class GamesHandler(identity: SSBid) {
      * You can always create a new game. Limitation only kicks in on participant's side.
      */
     fun addOwnGame(gameType: String, ownerFid: String): Int {
-        addInstanceToList(GameInstance(gameType, ownerFid, myId))
+        val currentTime = System.currentTimeMillis()
+        addInstanceToList(GameInstance(gameType, ownerFid, myId, currentTime))
         count++
         return instances.size
     }
