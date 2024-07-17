@@ -231,10 +231,6 @@ function menu_settings() {
 *   This method should display the open duels.
 */
 function show_duels() {
-    //closeOverlay();
-    setScenario('duels')
-    // Loading html content from tremola.html
-    //document.getElementById("div:duels").style.display = 'block';
     setScenario('duels');
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
@@ -245,7 +241,7 @@ function show_duels() {
 
     console.log('show_duels ', JSON.stringify("gamelist before"));
     var gameListString = "";
-
+//    var gameListString = "BSH ownerid1 participantid1 12 STOPPED"
     if (window.GamesHandler && typeof window.GamesHandler.createInstanceList === 'function') {
         gameListString = window.GamesHandler.createInstanceList();
         console.log('show_duels ', "gamelist received: ", gameListString);
@@ -280,35 +276,56 @@ function show_duels() {
             }
             console.log('Game-Container for: ', JSON.stringify(name));
 
-            var gameDiv = document.createElement("div");
-            gameDiv.style.display = "flex";
-            gameDiv.style.alignItems = "center";
-            gameDiv.style.marginBottom = "10px";
+            var gameDiv = document.createElement("button");
+            gameDiv.className = "duel-button";
+            gameDiv.onclick = () => onDuelButtonClicked(game);
+//            gameDiv.style.display = "flex";
+//            gameDiv.style.alignItems = "center";
+//            gameDiv.style.marginBottom = "10px";
 
-            if (name === "BSH") {
-                var img = document.createElement("img");
-                img.src = "android/tinySSB/app/src/main/assets/web/img/battleship.svg";
-                img.style.marginRight = "10px";
-                gameDiv.appendChild(img);
+            // Change background color based on state
+            if (state === 'STOPPED') {
+                gameDiv.classList.add('duel-button-stopped');
+            } else if (state === 'completed') {
+                gameDiv.classList.add('duel-button-completed');
+            } else if (state === 'pending') {
+                gameDiv.classList.add('duel-button-pending');
             }
+            // Create Icon for duel
+            const img = document.createElement("img");
+            if (name === "BSH") {
+                img.src = "./img/battleship.svg";
+            } else {
+                // other game icons
+                img.src = "./img/cancel.svg";
+            }
+            img.alt = `Duel Image`;
+            img.className = "duel-image";
+            gameDiv.appendChild(img);
 
-            var textDiv = document.createElement("div");
-            textDiv.style.flexGrow = "1";
-            var text = document.createElement("textarea");
-            text.rows = 3;
-            text.value = `Owner: ${owner}\nParticipant: ${participant}\nStart Time: ${startTime}`;
-            text.style.width = "100%";
-            textDiv.appendChild(text);
 
-            var button = document.createElement("button");
-            button.innerText = state;
-            button.style.marginLeft = "10px";
-            button.onclick = function() {
-                onDuelButtonClicked(game);
-            };
+//            var textDiv = document.createElement("div");
+//            textDiv.style.flexGrow = "1";
+//            var text = document.createElement("textarea");
+//            text.rows = 3;
+//            text.value = `Owner: ${owner}\nParticipant: ${participant}\nStart Time: ${startTime}`;
+//            text.style.width = "100%";
+//            textDiv.appendChild(text);
 
-            gameDiv.appendChild(textDiv);
-            gameDiv.appendChild(button);
+            // Create text for duel button
+            const span = document.createElement("span");
+            span.className = "duel-text";
+            span.innerHTML = `Owner: ${owner}<br>Participant: ${participant}<br>Start Time: ${startTime}<br>State: ${state}`;
+
+//           var button = document.createElement("button");
+//           button.innerText = state;
+//           button.style.marginLeft = "10px";
+//           button.onclick = function() {
+//               onDuelButtonClicked(game);
+//           };
+//
+            gameDiv.appendChild(span);
+//            gameDiv.appendChild(button);
 
             container.appendChild(gameDiv);
         });

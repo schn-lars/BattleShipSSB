@@ -700,10 +700,6 @@ input:checked + .slider:before {
     border: 2px solid #000000;
     z-index: 1000;
     }
-/*.scroll-container {
-    max-height: 500px;
-    overflow-y: auto;
-}*/
 
 .scroll-container {
   display: flex;
@@ -757,6 +753,18 @@ button.square:active {
   text-align: left;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+
+.duel-button-stopped {
+  background-color: #f8d7da; /*#d4edda; green background for active state */
+}
+
+.duel-button-completed {
+  background-color: #c3e6cb; /* blue background for completed state */
+}
+
+.duel-button-pending {
+  background-color: #ffeeba; /* yellow background for pending state */
 }
 
 .duel-button:hover {
