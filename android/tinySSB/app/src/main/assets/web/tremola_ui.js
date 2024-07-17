@@ -287,10 +287,16 @@ function show_duels() {
             // Change background color based on state
             if (state === 'STOPPED') {
                 gameDiv.classList.add('duel-button-stopped');
-            } else if (state === 'completed') {
-                gameDiv.classList.add('duel-button-completed');
-            } else if (state === 'pending') {
-                gameDiv.classList.add('duel-button-pending');
+            } else if (state === 'INVITED') {
+                gameDiv.classList.add('duel-button-invited');
+            } else if (state === 'RUNNING') {
+                gameDiv.classList.add('duel-button-running');
+            } else if (state === 'WAITING') {
+                gameDiv.classList.add('duel-button-waiting');
+            } else if (state === 'WON') {
+                gameDiv.classList.add('duel-button-won');
+            } else if (state === 'LOST') {
+                gameDiv.classList.add('duel-button-lost');
             }
             // Create Icon for duel
             const img = document.createElement("img");

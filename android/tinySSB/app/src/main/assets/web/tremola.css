@@ -755,16 +755,28 @@ button.square:active {
   transition: background-color 0.3s;
 }
 
+.duel-button-invited {
+    background-color: #d1ecf1; /* light blue */
+}
+
+.duel-button-running {
+    background-color: #d4edda; /* light green */
+}
+
+.duel-button-waiting {
+    background-color: #fff3cd; /* light yellow */
+}
+
+.duel-button-won {
+    background-color: #c3e6cb; /* green */
+}
+
+.duel-button-lost {
+    background-color: #f8d7da; /* light red */
+}
+
 .duel-button-stopped {
-  background-color: #f8d7da; /*#d4edda; green background for active state */
-}
-
-.duel-button-completed {
-  background-color: #c3e6cb; /* blue background for completed state */
-}
-
-.duel-button-pending {
-  background-color: #ffeeba; /* yellow background for pending state */
+    background-color: #e2e3e5; /* light grey */
 }
 
 .duel-button:hover {
