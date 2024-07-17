@@ -261,8 +261,9 @@ function show_duels() {
             var name = gameParts[0];
             var owner = gameParts[1];
             var participant = gameParts[2];
-            var currentTime = gameParts[3];
-            var date = new Date(currentTime);
+            var startTimeRaw = parseInt(gameParts[3]);;
+            // Format start time
+            var date = new Date(startTimeRaw);
             var options = {
                 weekday: 'long',
                 year: 'numeric',
@@ -273,7 +274,7 @@ function show_duels() {
                 second: 'numeric',
                 hour12: true
             };
-            var formattedTime = new Intl.DateTimeFormat('en-US', options).format(date);
+            var startTime = new Intl.DateTimeFormat('en-US', options).format(date);
             var state = gameParts[4];
             console.log('My Id: ', JSON.stringify(myId));
             if (owner == myId) {
