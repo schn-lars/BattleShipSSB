@@ -1,7 +1,6 @@
 "use strict";
 
 var battleships_turn = false
-var battleships_placed_ships = 0
 var battleships_horizontal = true
 var battleships_ship_positions = ""
 var battleship_ship_lengths = [2, 3, 3, 4 ,5]
@@ -9,6 +8,7 @@ var battleship_status = "stopped"
 
 var owner = ""
 var peer = ""
+var game = ""
 
 
 
@@ -45,6 +45,23 @@ function closeDuelOverlay() {
 
 // ---------- GAME-SCREEN -----------
 
+function update_game_gui() {
+    console.log("BSH updating GUI ...")
+    if (window.GamesHandler && typeof window.GamesHandler.getInstanceDescriptorFromFids === 'function') {
+        var instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer)
+        console.log("BSH update_gui ", JSON.stringify(instanceDescriptor))
+        var instanceList = instanceDescriptor.split(" ")
+        if (instanceList.length < 6) { return }
+        var playerTurn = instanceList[5]
+        if (playerTurn == "1") {
+            battleships(true, instanceList[6])
+        } else {
+            battleships(false, instanceList[6])
+        }
+    }
+}
+
+
 // The main function that launches the game GUI
 function battleships(turn, ships_fired_recv) {
     var args = ships_fired_recv.split("^");
@@ -60,7 +77,7 @@ function battleships(turn, ships_fired_recv) {
 
     battleships_load_config(battleship_status, args[0], args[1], args[2]);
 
-    battleships_show_turn()
+    //battleships_show_turn()
 }
 
 /**
@@ -73,18 +90,13 @@ function quit_bsh() {// TODO add owner and peer
 
 // Gets called when the user clicks on a square of the bottom field
 function battleship_bottom_field_click(i) {
+    console.log("BSH registered Shot: ", JSON.stringify(i))
     var square = document.getElementById("battleships:bottom" + i)
     // Do nothing if it is not our turn
     if (!battleships_turn) {
         return
     } else {
-        var other
-        if (curr_chat.split("@")[1] + ".ed25519" === myId.substring(1)) {
-            other = curr_chat.split("@")[2]
-        } else {
-            other = curr_chat.split("@")[1]
-        }
-        backend("battleship shoot " + other + ".ed25519 " + (((i % 10) + 9) % 10) + "" + Math.floor((i - 1) / 10))
+        backend("games BSH SHOT " + owner + " " + peer + " " + (((i % 10) + 9) % 10) + "" + Math.floor((i - 1) / 10))
         battleships_set_turn(false)
     }
     square.childNodes[0].className = "hole field_clicked"
@@ -169,12 +181,14 @@ function battleships_show_waiting() {
 
 // Shows the turn indicator below the grid
 function battleships_show_turn() {
+    console.log("BSH Showing Turn...")
     battleships_hide_controls()
-    var peerId = myId.substring(1, myId.length - suffix.length);
+    var peerId = myId;
     if (battleships_turn == null) { return; }
     var turn = document.getElementById("battleships:turn")
     turn.style.display = null
 
+    console.log("BSH Determining what to display as turn ...")
     if (peerId == owner || peerId == peer) {
         if (battleship_status == "WON") {
             turn.innerHTML = "You Won!"
@@ -221,10 +235,10 @@ function battleships_show_turn() {
 
 // Displays the config given from the backend. The format of the config is
 // well described in the backend.
-function battleships_load_config(state, ships, recv, deliv) {
+function battleships_load_config(state, ships, deliv, recv) {
     document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
     battleships_ship_positions = ""
-    console.log("BSH_load_config", JSON.stringify(state));
+    console.log("BSH_load_config", JSON.stringify(state + " " + ships + " " + recv + " " + deliv));
     if (state === "STOPPED") {
         battleships_setup()
         battleships_show_ship_placer()
@@ -250,6 +264,7 @@ function battleships_load_config(state, ships, recv, deliv) {
         battleships_setup()
         battleships_show_turn()
     }
+
     console.log("BSH chunking ships now ...", JSON.stringify(ships))
     var shipPositions = splitIntoChunks(ships, 3)
     console.log("BSH chunky ships: ", JSON.stringify(shipPositions))
@@ -259,7 +274,6 @@ function battleships_load_config(state, ships, recv, deliv) {
         var x = parseInt(ship.charAt(0))
         var y = parseInt(ship.charAt(1))
         if (x != -1) {
-            battleships_placed_ships++
             battleships_ship_positions = battleships_ship_positions + "" + ship
         }
         var direction = ship.slice(2, 100)
@@ -280,7 +294,8 @@ function battleships_load_config(state, ships, recv, deliv) {
             field.onclick = null
         }
     }
-    var shots_fired = splitIntoChunks(delivered, 3)
+    console.log("BSH parsing shotsFired ", JSON.stringify(deliv))
+    var shots_fired = splitIntoChunks(deliv, 3)
     for (var i = 0; i < shots_fired.length; i++) {
         var shot = shots_fired[i]
         if (shot === "") {
@@ -301,6 +316,7 @@ function battleships_load_config(state, ships, recv, deliv) {
         field.innerHTML = ""
         field.onclick = null
     }
+    console.log("BSH Parsing Shots Received ", JSON.stringify(recv))
     var shots_received = splitIntoChunks(recv, 3)
     for (var i = 0; i < shots_received.length; i++) {
         var shot = shots_received[i]
@@ -326,7 +342,7 @@ function battleships_load_config(state, ships, recv, deliv) {
         battleships_show_waiting()
         return
     }
-    battleships_set_turn(config_split[4] === "true")
+    //battleships_set_turn(config_split[4] === "true")
     battleships_show_turn()
 }
 
@@ -345,6 +361,7 @@ function reset_battleship_mode() {
     battleships_turn = null
     battleships_ship_positions = ""
     battleship_status = "STOPPED"
+    game = ""
 
     owner = ""
     peer = ""

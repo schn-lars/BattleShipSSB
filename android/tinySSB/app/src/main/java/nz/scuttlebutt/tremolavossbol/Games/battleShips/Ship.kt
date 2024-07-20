@@ -92,11 +92,9 @@ class Ship(
      * Checks if this ship is sunken. It's only sunken if every position of the ship got hit.
      */
     fun isSunken(): Boolean {
-        var sunken =
-            true
+        var sunken = true
         for (i in 0 until length) {
-            sunken =
-                sunken && hits[i]
+            sunken = sunken && hits[i]
         }
         return sunken
     }
@@ -125,57 +123,11 @@ class Ship(
      * Checks each ship position against each other ship position ot see if they have overlap.
      * This is really slow but since the ship size is at maximum 5 it should be fine
      */
-    fun intersects(
-        other: Ship
-    ): Boolean {
-        if (this.position.getXPosition() < 0 || other.position.getXPosition() < 0) {
-            return false
-        }
-        val positionThis =
-            Position2D(
-                this.position.getXPosition(),
-                this.position.getYPosition()
-            )
-        val positionOther =
-            Position2D(
-                other.position.getXPosition(),
-                other.position.getYPosition()
-            )
+    fun intersects(other: Ship): Boolean {
+        val thisPositions = getPositions()
+        val otherPositions = other.getPositions()
 
-        for (i in 0 until this.length) {
-            when (this.direction) {
-                Direction.DOWN -> positionThis.setYPosition(
-                    this.position.getYPosition() + i
-                )
-                Direction.UP -> positionThis.setYPosition(
-                    this.position.getYPosition() - i
-                )
-                Direction.RIGHT -> positionThis.setXPosition(
-                    this.position.getXPosition() + i
-                )
-                Direction.LEFT -> positionThis.setXPosition(
-                    this.position.getXPosition() - i
-                )
-            }
-            for (j in 0 until other.length) {
-                when (other.direction) {
-                    Direction.DOWN -> positionThis.setYPosition(
-                        other.position.getYPosition() + i
-                    )
-                    Direction.UP -> positionThis.setYPosition(
-                        other.position.getYPosition() - i
-                    )
-                    Direction.RIGHT -> positionThis.setXPosition(
-                        other.position.getXPosition() + i
-                    )
-                    Direction.LEFT -> positionThis.setXPosition(
-                        other.position.getXPosition() - i
-                    )
-                }
-                if (positionThis == positionOther) return true
-            }
-        }
-        return false
+        return thisPositions.any { it in otherPositions }
     }
 
     /**
@@ -184,16 +136,19 @@ class Ship(
      * @return True if it is out of bounds
      */
     fun isOutOfBounds(): Boolean {
-        if (position.getXPosition() < 0 || position.getXPosition() >= 10 ||
-            position.getYPosition() < 0 || position.getYPosition() >= 10
-        ) {
+        val x = position.getXPosition()
+        val y = position.getYPosition()
+        val gridSize = 10
+
+        if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) {
             return true
         }
+
         return when (direction) {
-            Direction.UP -> position.getYPosition() - length > 10
-            Direction.DOWN -> position.getYPosition() + length < -1
-            Direction.RIGHT -> position.getXPosition() + length > 10
-            Direction.LEFT -> position.getXPosition() - length < -1
+            Direction.UP -> y - (length - 1) < 0
+            Direction.DOWN -> y + (length - 1) >= gridSize
+            Direction.RIGHT -> x + (length - 1) >= gridSize
+            Direction.LEFT -> x - (length - 1) < 0
         }
     }
 
@@ -207,6 +162,7 @@ class Ship(
             )
         }
     }
+
 
     /**
      * Gets the i-th position of the ship

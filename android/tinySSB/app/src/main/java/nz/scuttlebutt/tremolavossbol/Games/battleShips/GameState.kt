@@ -104,19 +104,9 @@ class GameState(
      * Takes an incoming shot and returns weather the boat was hit, sunken or
      * the shot missed entirely
      */
-    fun receiveShot(
-        x: Int,
-        y: Int
-    ): ShotOutcome {
-        if (!turn) {
-
-        }
-        turn = true
+    fun receiveShot(x: Int, y: Int): ShotOutcome {
         for (ship in ships) {
-            when (ship.isHit(
-                x,
-                y
-            )) {
+            when (ship.isHit(x, y)) {
                 ShotOutcome.MISS -> {
                     continue
                 }

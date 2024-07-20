@@ -267,9 +267,9 @@ function show_duels() {
             var gameParts = game.split(" ");
             var name = gameParts[0];
             var owner = gameParts[1];
-            var ownerAlias = tremola.contacts[owner].alias;
+            //var ownerAlias = tremola.contacts[owner].alias;
             var participant = gameParts[2];
-            var participantAlias = tremola.contacts[participant].alias;
+            //var participantAlias = tremola.contacts[participant].alias;
             var startTimeRaw = parseInt(gameParts[3]);;
             // Format start time
             var date = new Date(startTimeRaw);
@@ -288,19 +288,17 @@ function show_duels() {
             console.log('My Id: ', JSON.stringify(myId));
             var suffix = ".ed25519";
             if (owner == myId) {
-                ownerAlias = "Me";
+                owner = "Me"
                 participant = id2b32(participant);
             } else if (participant == myId) {
-                participantAlias = "Me";
+                participant = "Me";
                 owner = id2b32(owner);
             } else {
                 participant = id2b32(participant);
                 owner = id2b32(owner);
             }
             var turn = gameList[5];
-            var ship_pos = gameList[6];
-            var receivedShots = gameList[7];
-            var deliveredShots = gameList[8];
+            var ships_rec_delivered = gameList[6];
 
             console.log('Game-Container for: ', JSON.stringify(name));
 
@@ -340,7 +338,7 @@ function show_duels() {
             // Create text for duel button
             const span = document.createElement("span");
             span.className = "duel-text";
-            span.innerHTML = `Owner: ${ownerAlias}<br>Participant: ${participantAlias}<br>Start Time: ${startTime}<br>State: ${state}`;
+            span.innerHTML = `Owner: ${owner}<br>Participant: ${participant}<br>Start Time: ${startTime}<br>State: ${state}`;
 
             gameDiv.appendChild(span);
 
@@ -353,6 +351,7 @@ function onDuelButtonClicked(duelString) {
   console.log("Button clicked for: " + JSON.stringify(duelString));
   console.log("myId: ", JSON.stringify(myId));
   var duelList = duelString.split(" ");
+  game = duelList[0]
   console.log("owner: ", JSON.stringify(duelList[1]));
   switch (duelList[4]) {
     case "STOPPED":
@@ -388,7 +387,11 @@ function onDuelButtonClicked(duelString) {
         battleship_status = "RUNNING"
         owner = duelList[1];
         peer = duelList[2];
-        battleships(true, duelList[6]);
+        if (duelList[5] == "0") {
+            battleships(false, duelList[6]);
+        } else {
+            battleships(true, duelList[6]);
+        }
         return;
     case "SPEC":
         owner = duelList[1];

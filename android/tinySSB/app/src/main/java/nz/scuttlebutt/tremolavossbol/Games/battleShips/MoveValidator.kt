@@ -63,16 +63,28 @@ class  MoveValidator {
             false
         ships.forEachIndexed { i, ship ->
             if (i != index) {
-                hasOverlap =
-                    hasOverlap || placedShip.intersects(
-                        ship
-                    )
+                hasOverlap = hasOverlap || placedShip.intersects(ship)
             }
         }
         return !hasOverlap
     }
 
 
+    fun Ship.isOutOfBounds(): Boolean {
+        for (position in this.getPositions()) {
+            if (position.getXPosition() <= 0 || position.getXPosition() >= 9 ||
+                position.getYPosition() <= 0 || position.getYPosition() >= 9) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun Ship.intersects(other: Ship): Boolean {
+        val thisPositions = this.getPositions().toSet()
+        val otherPositions = other.getPositions().toSet()
+        return thisPositions.intersect(otherPositions).isNotEmpty()
+    }
 
     /**
      * Helper function to determine the out-of-bounds coordinates

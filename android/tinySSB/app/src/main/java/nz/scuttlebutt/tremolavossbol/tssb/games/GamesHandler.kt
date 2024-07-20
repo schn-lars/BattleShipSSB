@@ -138,6 +138,19 @@ class GamesHandler(identity: SSBid) {
     }
 
     /**
+     * This method is used to react to incoming messages regarding updating the GUI.
+     */
+    @JavascriptInterface
+    fun getInstanceDescriptorFromFids(gameType: String, oID: String, pID: String): String {
+        val instance: GameInstance? = getInstanceFromFids(gameType, oID, pID)
+        if (instance == null) {
+            return ""
+        } else {
+            return getInstanceDescriptor(instance)
+        }
+    }
+
+    /**
      * This method gets called, as soon as you want to open the Game-GUI.
      */
     // TODO change depending on game mode

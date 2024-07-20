@@ -294,22 +294,25 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                             return
                         }
                         "SHOT" -> {
-                            val inst = gamesHandler.getInstanceFromFids("BSH", msg[2], msg[3])
+                            val inst = gamesHandler.getInstanceFromFids("BSH", args[3], args[4])
                             var isPeer: String = ""
-                            if (gamesHandler.isIdEqualToMine(msg[2])) { // I am owner
+                            if (gamesHandler.isIdEqualToMine(args[3])) { // I am owner
                                 isPeer = "0"
-                            } else if (gamesHandler.isIdEqualToMine(msg[3])) {
+                            } else if (gamesHandler.isIdEqualToMine(args[4])) {
                                 isPeer = "1"
                             } else {
                                 return
                             }
                             // This means
                             if (inst != null) {
-                                if (!(inst.game as BattleshipGame).gameState!!.isMyTurn()) { return }
+                                if (!(inst.game as BattleshipGame).gameState!!.isMyTurn()) {
+                                    return
+                                }
+                                (inst.game as BattleshipGame).gameState!!.turn = false
                             } else {
                                 return
                             }
-                            val shot = "${msg[0]} ${msg[1]} ${msg[2]} ${msg[3]} $isPeer ${msg[4]}"
+                            val shot = "${args[1]} ${args[2]} ${args[3]} ${args[4]} $isPeer ${args[5]}"
                             Log.d("GAM APP (SHOT)", shot)
                             public_post_game_request(Base64.encodeToString(shot.toByteArray(), Base64.NO_WRAP))
                         }

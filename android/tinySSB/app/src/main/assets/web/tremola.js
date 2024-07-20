@@ -1231,11 +1231,10 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
                 var response = window.GamesHandler.onGameBackendEvent(e.public[1]);
                 if (response != "") {
                     // TODO anpassen von GUI
-                    var req = response.split(' ');
-                    if (req[0] == "GUI") {
-                        update_game_gui(req);
-                    }
                     backend(response);
+                }
+                if (curr_scenario == "battleships") {
+                    update_game_gui()
                 }
             } else {
                 console.error("GamesHandler.onGameBackendEvent is not a function");
