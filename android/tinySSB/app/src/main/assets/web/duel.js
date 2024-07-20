@@ -188,45 +188,56 @@ function battleships_show_turn() {
     turn.style.display = null
 
     console.log("BSH Determining what to display as turn ...")
+    turn.className = ''; // Reset classes
     if (peerId == owner || peerId == peer) {
         if (battleship_status == "WON") {
-            turn.innerHTML = "You Won!"
+            turn.innerHTML = "You Won!";
+            turn.classList.add('turn-won');
         } else if (battleship_status == "LOST") {
-            turn.innerHTML = "You Lost!"
+            turn.innerHTML = "You Lost!";
+            turn.classList.add('turn-lost');
         } else if (battleship_status == "STOPPED") {
-            turn.innerHTML = "The game is stopped!"
+            turn.innerHTML = "The game is stopped!";
+            turn.classList.add('turn-default');
         } else if (battleship_status == "INVITED") {
-            turn.innerHTML = "Waiting for other!"
+            turn.innerHTML = "Waiting for other!";
+            turn.classList.add('turn-default');
         } else if (battleship_status == "WAITING") {
             if (peerId == "-") {
-                turn.innerHTML = "Waiting ..."
+                turn.innerHTML = "Waiting ...";
+                turn.classList.add('turn-default');
             }
         } else if (battleship_status == "RUNNING") {
             if (battleships_turn) {
-                turn.innerHTML = "Your Turn"
+                turn.innerHTML = "Your Turn";
+                turn.classList.add('turn-default');
             } else {
-                turn.innerHTML = "Enemy Turn"
+                turn.innerHTML = "Enemy Turn";
+                turn.classList.add('turn-default');
             }
         }
     } else {
         if (battleship_status == "WON") {
             if (battleships_turn) {
-                turn.innerHTML = "Owner has Won!"
+                turn.innerHTML = "Owner has Won!";
             } else {
-                turn.innerHTML = "Peer has Won!"
+                turn.innerHTML = "Peer has Won!";
             }
+            turn.classList.add('turn-won');
         } else if (battleship_status == "LOST") {
             if (battleships_turn) {
-                turn.innerHTML = "Owner has Lost!"
+                turn.innerHTML = "Owner has Lost!";
             } else {
-                turn.innerHTML = "Peer has Lost!"
+                turn.innerHTML = "Peer has Lost!";
             }
+            turn.classList.add('turn-lost');
         } else {
             if (battleships_turn) {
-                turn.innerHTML = "Owner's Turn!"
+                turn.innerHTML = "Owner's Turn!";
             } else {
-                turn.innerHTML = "Peer's Turn!"
+                turn.innerHTML = "Peer's Turn!";
             }
+            turn.classList.add('turn-default');
         }
     }
 }

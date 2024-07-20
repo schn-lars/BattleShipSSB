@@ -958,6 +958,21 @@ button.square:active {
     color: #fff;
 }
 
+.turn-won {
+    background-color: green;
+    color: white;
+}
+
+.turn-lost {
+    background-color: red;
+    color: white;
+}
+
+.turn-default {
+    background-color: initial;
+    color: initial;
+}
+
 .battleships_orientation_button {
     margin-top: 10px;
     width: 35vw;
