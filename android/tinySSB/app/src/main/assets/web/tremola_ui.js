@@ -8,7 +8,7 @@ var display_or_not = [
     'div:qr', 'div:back',
     'core', 'lst:chats', 'div:posts', 'lst:contacts', 'lst:members', 'the:connex',
     'lst:kanban', 'div:footer', 'div:textarea', 'div:confirm-members', 'plus',
-    'div:settings', 'div:board', 'div:duels' // BATTLESHIP
+    'div:settings', 'div:board', 'div:duels', 'battleships' // BATTLESHIP
 ];
 
 var prev_scenario = 'chats';
@@ -24,7 +24,8 @@ var scenarioDisplay = {
     'settings': ['div:back', 'div:settings', 'core'],
     'kanban': ['div:qr', 'core', 'lst:kanban', 'div:footer', 'plus'],
     'board': ['div:back', 'core', 'div:board'],
-    'duels': ['div:back', 'core', 'div:duels'] // BATTLESHIP
+    'duels': ['div:back', 'core', 'div:duels'], // BATTLESHIP
+    'battleships': ['div:back', 'battleships'] // BATTLESHIP
 }
 
 var scenarioMenu = {
@@ -66,6 +67,8 @@ var scenarioMenu = {
 
     'duels': [], // BATTLESHIP
 
+    'battleships': [['Quit Game', 'quit_bsh']], // BATTLESHIP
+
     'kanban': [['New Kanban board', 'menu_new_board'],
         ['Invitations', 'menu_board_invitations'],
         ['Connected Devices', 'menu_connection'],
@@ -95,12 +98,16 @@ function onBackPressed() {
         return;
     }
     if (['chats', 'contacts', 'connex', 'board'].indexOf(curr_scenario) >= 0) {
-        if (curr_scenario == 'chats')
+        if (curr_scenario == 'chats') {
             backend("onBackPressed");
-        else if (curr_scenario == 'board')
+        } else if (curr_scenario == 'board') {
             setScenario('kanban')
-        else
+        } else if (curr_scenario == 'battleships') { // BATTLESHIP // TODO prev_scenario für duels unc posts und nicht in chat
+            reset_battleship_mode()
+            show_duels()
+        } else {
             setScenario('chats')
+        }
     } else {
         if (curr_scenario == 'settings') {
             document.getElementById('div:settings').style.display = 'none';
@@ -137,7 +144,7 @@ function setScenario(s) {
             document.getElementById('tremolaTitle').style.position = null;
         }
 
-        if (s == "posts" || s == "settings" || s == "board" || s == "duels") {
+        if (s == "posts" || s == "settings" || s == "board" || s == "duels" || s == 'battleships') {
             document.getElementById('tremolaTitle').style.display = 'none';
             document.getElementById('conversationTitle').style.display = null;
             // document.getElementById('plus').style.display = 'none';
@@ -277,6 +284,7 @@ function show_duels() {
             var startTime = new Intl.DateTimeFormat('en-US', options).format(date);
             var state = gameParts[4];
             console.log('My Id: ', JSON.stringify(myId));
+            var suffix = ".ed25519";
             if (owner == myId) {
                 owner = "Me";
                 participant = id2b32(participant);
@@ -287,6 +295,11 @@ function show_duels() {
                 participant = id2b32(participant);
                 owner = id2b32(owner);
             }
+            var turn = gameList[5];
+            var ship_pos = gameList[6];
+            var receivedShots = gameList[7];
+            var deliveredShots = gameList[8];
+
             console.log('Game-Container for: ', JSON.stringify(name));
 
             var gameDiv = document.createElement("button");
@@ -353,8 +366,53 @@ function show_duels() {
 
 function onDuelButtonClicked(duelString) {
   console.log("Button clicked for: " + JSON.stringify(duelString));
-  battleship();
-  // Hier kannst du den Code hinzufügen, der ausgeführt werden soll, wenn der Knopf gedrückt wird
+  console.log("myId: ", JSON.stringify(myId));
+  var duelList = duelString.split(" ");
+  console.log("owner: ", JSON.stringify(duelList[1]));
+  switch (duelList[4]) {
+    case "STOPPED":
+        return;
+    case "INVITED":
+        if (duelList[1] != myId) { // check if I am not the owner
+            // I am not owner
+            backend("games BSH INVACC " + duelList[1] + " " + myId); // nicht peerId
+            // TODO possibly add cooldown
+        } else {
+            // TODO open game to see ships
+            battleship_status = "INVITED";
+            owner = duelList[1];
+            battleships(null, duelList[6]);
+        }
+        return;
+    case "WON": // 6 = shotsDeliverOutcome, 7 = shotsReceivedOutcome, 8 = ships
+        owner = duelList[1];
+        peer = duelList[2];
+        battleships(null, duelList[6]);
+        return;
+    case "LOST":
+        owner = duelList[1];
+        peer = duelList[2];
+        battleships(null, duelList[6]);
+        return;
+    case "WAITING":
+        owner = duelList[1];
+        peer = duelList[2];
+        battleships(false, duelList[6]);
+        return;
+    case "RUNNING":
+        battleship_status = "RUNNING"
+        owner = duelList[1];
+        peer = duelList[2];
+        battleships(true, duelList[6]);
+        return;
+    case "SPEC":
+        owner = duelList[1];
+        peer = duelList[2];
+        battleships(null, duelList[6]);
+        return;
+    default:
+        return;
+  }
 }
 
 

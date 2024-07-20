@@ -159,27 +159,27 @@ class GameState(
             state.append(it.getPositions()[0].getXPosition())
                 .append(it.getPositions()[0].getYPosition())
                 .append(it.getDirection())
-                .append("~")
+            //.append("~)
         }
-        if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
+        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
         state.append("^")
         shotsFiredWithOutcome.forEach {
             state.append(it.first.getXPosition())
                 .append(it.first.getYPosition())
                 .append(it.second)
-                .append("~")
+                //.append("~")
         }
-        if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
+        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
         state.append("^")
         shotReceived.forEach {
             state.append(it.first.getXPosition())
                 .append(it.first.getYPosition())
                 .append(it.second)
-                .append("~")
+                //.append("~")
         }
-        if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
-        state.append("^")
-            .append(turn)
+        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
+        //state.append("^")
+            //.append(turn)
         return state.toString()
     }
 
@@ -201,17 +201,41 @@ class GameState(
             state.append(it.getPositions()[0].getXPosition())
                 .append(it.getPositions()[0].getYPosition())
                 .append(it.getDirection())
-                .append("~")
+                //.append("~")
         }
-        state.deleteCharAt(state.lastIndexOf("~"))
+        //state.deleteCharAt(state.lastIndexOf("~"))
         return state.toString()
     }
 
-    fun shotsFiredWithOutcome(): MutableList<Pair<Position2D, ShotOutcome>> {
-        return shotsFiredWithOutcome
+    /**
+     * This method returns a string for all moves the owner of the game has done.
+     */
+    fun shotsFiredWithOutcomeToString(): String {
+        val result = StringBuilder()
+        shotsFiredWithOutcome.forEach { (position, outcome) ->
+            result.append("${position.getXPosition()}${position.getYPosition()}${outcome}")
+        }
+        if (result.isEmpty()) {
+            return "-"
+        }
+        return result.toString()
     }
 
     fun isMyTurn(): Boolean {
         return turn
+    }
+
+    /**
+     * This method returns a string for all moves the peer of the game has done.
+     */
+    fun shotsReceivedWithOutcomeToString(): String {
+        val result = StringBuilder()
+        shotReceived.forEach { (position, outcome) ->
+            result.append("${position.getXPosition()}${position.getYPosition()}${outcome}")
+        }
+        if (result.isEmpty()) {
+            return "-"
+        }
+        return result.toString()
     }
 }

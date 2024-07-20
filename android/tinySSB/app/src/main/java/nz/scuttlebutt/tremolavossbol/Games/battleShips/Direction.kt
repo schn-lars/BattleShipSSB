@@ -10,6 +10,20 @@ enum class Direction(val string: String) {
     LEFT("LEFT");
 
     override fun toString(): String {
-        return this.string
+        when (this.string) {
+            "UP" -> {
+                return "U";
+            }
+            "DOWN" -> {
+                return "D";
+            }
+            "LEFT" -> {
+                return "L"
+            }
+            "RIGHT" -> {
+                return "R"
+            }
+        }
+        return ""
     }
 }

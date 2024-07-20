@@ -793,3 +793,193 @@ button.square:active {
   font-size: 18px;
   font-weight: bold;
 }
+
+.board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.battleshipsTopRow {
+    background: #000896;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.battleshipsLeftRow {
+    background: #000896;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.displays {
+    width: 40vh;
+}
+
+.grid {
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+
+}
+
+.field {
+    background: LightBlue;
+    border-right: 1px solid Blue;
+    border-top: 1px solid Blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hole {
+    width: 30%;
+    height: 30%;
+    border: 1px solid Blue;
+    border-radius: 50%;
+}
+
+.ship {
+    background: Black;
+    border-right: 1px solid Blue;
+    border-top: 1px solid Blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.miss {
+    background: Blue;
+    border-right: 1px solid Blue;
+    border-top: 1px solid Blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hit {
+    background: Orange;
+    border-right: 1px solid Blue;
+    border-top: 1px solid Blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sunken {
+    background: Red;
+    border-right: 1px solid Blue;
+    border-top: 1px solid Blue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.field_clicked {
+    -webkit-animation: grow 0.5s;
+}
+
+@-webkit-keyframes grow {
+    from {
+        width: 0%;
+        height: 0%;
+    }
+    to {
+        width: 30%;
+        height: 30%;
+    }
+}
+
+.battleships_control {
+    display: flex;
+    justify-content: center;
+}
+
+.battleships_info {
+    margin-top: 10px;
+    width: 70%;
+    padding: 15px 25px;
+    font-size: 1.5em;
+    text-align: center;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+}
+
+.battleships_placer {
+    display: flex;
+    justify-content: center;
+}
+
+.battleships_length {
+    width: 35vw;
+    text-align: center;
+    font-size: 1.3em;
+    padding: 15px;
+    margin-top: 10px;
+    background-color: #00c9ff;
+    border: none;
+    border-radius: 15px;
+    color: #fff;
+}
+
+.battleships_turn {
+    width: 70vw;
+    text-align: center;
+    font-size: 1.3em;
+    padding: 15px;
+    margin-top: 10px;
+    background-color: #00c9ff;
+    border: none;
+    border-radius: 15px;
+    color: #fff;
+}
+
+.battleships_orientation_button {
+    margin-top: 10px;
+    width: 35vw;
+    padding: 15px;
+    font-size: 1.3em;
+    text-align: center;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+}
+
+.battleships_orientation_button:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+.battleships_big_button {
+    margin-top: 10px;
+    width: 70%;
+    padding: 15px 25px;
+    font-size: 1.5em;
+    text-align: center;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+}
+
+.battleships_big_button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}

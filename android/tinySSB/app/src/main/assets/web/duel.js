@@ -1,11 +1,15 @@
 "use strict";
 
-let battleships_turn = false
-let battleships_placed_ships = 0
-let battleships_horizontal = true
-let battleships_ship_positions = ""
-let battleship_ship_lengths = [2, 3, 3, 4 ,5]
-let battleship_status = "stopped"
+var battleships_turn = false
+var battleships_placed_ships = 0
+var battleships_horizontal = true
+var battleships_ship_positions = ""
+var battleship_ship_lengths = [2, 3, 3, 4 ,5]
+var battleship_status = "stopped"
+
+var owner = ""
+var peer = ""
+
 
 
 function duel_openDuels() {
@@ -26,9 +30,9 @@ function inviteForDuel(gameType) {
     //var stringToEncode = "GAM_BSH_INV_" + myId;
     var stringToEncode = "BSH INV " + myId;
     console.log('Invited battleship', JSON.stringify(stringToEncode))
-    var encodedString = btoa(stringToEncode);
+    //var encodedString = btoa(stringToEncode);
     //backend("publ:post [] "+ encodedString + " null");
-    backend("games "+ encodedString);
+    backend("games "+ stringToEncode);
 }
 
 function closeDuelOverlay() {
@@ -41,100 +45,31 @@ function closeDuelOverlay() {
 
 // ---------- GAME-SCREEN -----------
 
-// The main function that launches the GUI
-function battleships() {
+// The main function that launches the game GUI
+function battleships(turn, ships_fired_recv) {
+    var args = ships_fired_recv.split("^");
+    battleships_turn = turn;
+    console.log("Called BSH GUI:", JSON.stringify(ships_fired_recv));
+
     closeOverlay();
     setScenario("battleships")
-    document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
-    // You can only play of there are 2 participants in the chat
-    //if (curr_chat.split("@").length != 3) {
-    //    launch_snackbar("Battleships is not available in this chat")
-    //    return
-    //}
-    battleships_setup()
-    //var other
-    //if (curr_chat.split("@")[1] + ".ed25519" === myId.substring(1)) {
-    //    other = curr_chat.split("@")[2]
-    //} else {
-    //    other = curr_chat.split("@")[1]
-    //}
+
+    var c = document.getElementById("conversationTitle");
+    c.style.display = null;
+    c.innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
+
+    battleships_load_config(battleship_status, args[0], args[1], args[2]);
+
+    battleships_show_turn()
 }
 
-// Gets called whenever the user clicks on a square of the top field
-function battleship_top_field_click(i) {
-    if (battleships_placed_ships === 5 || battleship_status == "invited") {
-        return
-    }
-    battleships_place_ship(i, battleship_ship_lengths[battleships_placed_ships])
+/**
+*   This function is called if a user wants to quit the game.
+*/
+function quit_bsh() {// TODO add owner and peer
+    backend("games BSH DUELQUIT " + owner + " " + peer);
 }
 
-// Tests if the ship placement is valid and places it if it is
-function battleships_place_ship(pos, length) {
-    var x = (((pos % 10) + 9) % 10)
-    var y = Math.floor((pos - 1) / 10)
-    if (battleships_horizontal) {
-        if (x + length > 10 || battleships_intersect(x, y)) {
-            return
-        }
-        battleships_ship_positions = battleships_ship_positions + "~" + x + "" + y + "RIGHT"
-        battleships_placed_ships++
-        for (var i = 0; i < length; i++) {
-            var field = document.getElementById("battleships:top" + (pos + i))
-            field.className = "ship"
-            field.innerHTML = ""
-            field.onclick = null
-        }
-    } else {
-        if (y + length > 10 || battleships_intersect(x, y)) {
-            return
-        }
-        battleships_ship_positions = battleships_ship_positions + "~" + x + "" + y + "DOWN"
-        battleships_placed_ships++
-        for (var i = 0; i < length; i++) {
-           var field = document.getElementById("battleships:top" + (pos + i * 10))
-           field.className = "ship"
-           field.innerHTML = ""
-           field.onclick = null
-        }
-    }
-    if (battleships_placed_ships === 1) {
-        battleships_ship_positions = battleships_ship_positions.substring(1)
-    }
-    battleships_show_ship_placer()
-}
-
-// Really shitty test if the placed ship overlaps any existing ships
-// since using the backend game logic would be even more spaghetti
-function battleships_intersect(x, y) {
-    var positions = battleships_ship_positions.split("~")
-    // Go through all existing ships
-    for (var i = 0; i < positions.length; i++) {
-        var ship = positions[i]
-        var ship_x = parseInt(ship.charAt(0))
-        var ship_y = parseInt(ship.charAt(1))
-        var direction = ship.substring(2)
-        // Go through the length of the current ship
-        for (var j = 0; j < battleship_ship_lengths[i]; j++) {
-            var current_x = ship_x
-            var current_y = ship_y
-            if (direction === "RIGHT") {
-                current_x = ship_x + j
-            } else {
-                current_y = ship_y + j
-            }
-            // Go through the placed ship and compare positions
-            for (var k = 0; k < battleship_ship_lengths[battleships_placed_ships]; k++) {
-                if (battleships_horizontal && current_x === x + k && current_y === y) {
-                    return true
-                }
-                if (!battleships_horizontal && current_x === x && current_y === y + k) {
-                   return true
-                }
-            }
-        }
-    }
-    return false
-}
 
 // Gets called when the user clicks on a square of the bottom field
 function battleship_bottom_field_click(i) {
@@ -160,6 +95,7 @@ function battleship_bottom_field_click(i) {
 
 // Generates the HTML of the playing field
 function battleships_setup() {
+    console.log("BSH_setup()", JSON.stringify(battleship_status));
     battleships_hide_controls()
     var board = document.getElementById("battleships:board")
     var topgrid = document.getElementById("battleships:topgrid")
@@ -201,7 +137,7 @@ function battleships_set_turn(is_turn) {
 // Hides everything below the two grids
 function battleships_hide_controls() {
     document.getElementById("battleships:invite").style.display = "none"
-    document.getElementById("battleships:accept").style.display = "none"
+    document.getElementById("battleships:invited").style.display = "none"
     document.getElementById("battleships:waiting").style.display = "none"
     document.getElementById("battleships:placer").style.display = "none"
     document.getElementById("battleships:turn").style.display = "none"
@@ -214,9 +150,9 @@ function battleships_show_invite_button() {
 }
 
 // Shows the accept button below the grid
-function battleships_show_accept_button() {
+function battleships_show_invited_button() {
     battleships_hide_controls()
-    document.getElementById("battleships:accept").style.display = null
+    document.getElementById("battleships:invited").style.display = null
 }
 
 // Shows the waiting text field below the grid
@@ -228,151 +164,108 @@ function battleships_show_waiting() {
 // Shows the turn indicator below the grid
 function battleships_show_turn() {
     battleships_hide_controls()
+    var peerId = myId.substring(1, myId.length - suffix.length);
+    if (battleships_turn == null) { return; }
     var turn = document.getElementById("battleships:turn")
     turn.style.display = null
-    if (battleships_turn) {
-        turn.innerHTML = "Your Turn"
-    } else {
-        turn.innerHTML = "Enemy Turn"
-    }
-}
 
-// Shows the ship placer tool below the grid
-function battleships_show_ship_placer() {
-    battleships_hide_controls()
-    var placer = document.getElementById("battleships:placer")
-    var length = document.getElementById("battleships:length")
-    placer.style.display = null
-    switch (battleships_placed_ships) {
-        case 0:
-            length.innerHTML = "Boat Length: 2"
-            break
-        case 1:
-            length.innerHTML = "Boat Length: 3"
-            break
-        case 2:
-            length.innerHTML = "Boat Length: 3"
-            break
-        case 3:
-            length.innerHTML = "Boat Length: 4"
-            break
-        case 4:
-            length.innerHTML = "Boat Length: 5"
-            break
-        case 5:
-            if (battleship_status === "accepted") {
-                battleships_accept()
-                battleships_show_turn()
-            } else {
-                battleships_show_invite_button()
+    if (peerId == owner || peerId == peer) {
+        if (battleship_status == "WON") {
+            turn.innerHTML = "You Won!"
+        } else if (battleship_status == "LOST") {
+            turn.innerHTML = "You Lost!"
+        } else if (battleship_status == "STOPPED") {
+            turn.innerHTML = "The game is stopped!"
+        } else if (battleship_status == "INVITED") {
+            turn.innerHTML = "Waiting for Invite to be accepted!"
+        } else if (battleship_status == "WAITING") {
+            if (peerId == "-") {
+                turn.innerHTML = "Waiting ..."
             }
-            break
-    }
-}
-
-// Flips the placement orientation
-function battleships_flip() {
-    var orientation_button = document.getElementById("battleships:orientation")
-    if (battleships_horizontal) {
-        orientation_button.innerHTML = "Vertical"
+        } else if (battleship_status == "RUNNING") {
+            if (battleships_turn) {
+                turn.innerHTML = "Your Turn"
+            } else {
+                turn.innerHTML = "Enemy Turn"
+            }
+        }
     } else {
-        orientation_button.innerHTML =  "Horizontal"
+        if (battleship_status == "WON") {
+            if (battleships_turn) {
+                turn.innerHTML = "Owner has Won!"
+            } else {
+                turn.innerHTML = "Peer has Won!"
+            }
+        } else if (battleship_status == "LOST") {
+            if (battleships_turn) {
+                turn.innerHTML = "Owner has Lost!"
+            } else {
+                turn.innerHTML = "Peer has Lost!"
+            }
+        } else {
+            if (battleships_turn) {
+                turn.innerHTML = "Owner's Turn!"
+            } else {
+                turn.innerHTML = "Peer's Turn!"
+            }
+        }
     }
-    battleships_horizontal = !battleships_horizontal
 }
 
-// Sends the ship positions to the backend and tells it to invite the other player
-function battleships_invite() {
-    var other
-    if (curr_chat.split("@")[1] + ".ed25519" === myId.substring(1)) {
-        other = curr_chat.split("@")[2]
-    } else {
-        other = curr_chat.split("@")[1]
-    }
-    backend("battleship invite " + other + ".ed25519 " + battleships_ship_positions)
-    battleships_show_waiting()
-}
-
-function battleships_accept_button() {
-    battleship_status = "accepted"
-    battleships_show_ship_placer()
-}
-
-// Sends the ship positions to the backend and tells it to accept the invite
-function battleships_accept() {
-    var other
-    if (curr_chat.split("@")[1] + ".ed25519" === myId.substring(1)) {
-        other = curr_chat.split("@")[2]
-    } else {
-        other = curr_chat.split("@")[1]
-    }
-    backend("battleship accept " + other + ".ed25519 " + battleships_ship_positions)
-}
-
-// Calls the backend to reload the gui status. Does not generate the gui again.
-function battleships_reload_gui() {
-    var other
-    if (curr_chat.split("@")[1] + ".ed25519" === myId.substring(1)) {
-        other = curr_chat.split("@")[2]
-    } else {
-        other = curr_chat.split("@")[1]
-    }
-    backend("battleship serialize " + other + ".ed25519")
-}
 
 // Displays the config given from the backend. The format of the config is
 // well described in the backend.
-function battleships_load_config(config) {
+function battleships_load_config(state, ships, recv, deliv) {
     document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
-    battleships_placed_ships = 0
     battleships_ship_positions = ""
-    if (config === undefined) {
-        launch_snackbar("Game not started yet")
-        return
-    }
-    var config_split = config.split("^")
-    if (config_split[0] === "STOPPED") {
-        battleship_status = "stopped"
+    console.log("BSH_load_config", JSON.stringify(state));
+    if (state === "STOPPED") {
         battleships_setup()
         battleships_show_ship_placer()
         return
-    } else if (config_split[0] === "INVITED") {
-        battleship_status = "invited"
+    } else if (state === "INVITED") {
         battleships_setup()
-        battleships_show_accept_button()
-        return
-    } else if (config_split[0] === "WON") {
+        battleships_show_invited_button()
+        //return
+    } else if (state === "WON") {
         battleship_status = "stopped"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Won!</strong></font></div>";
         battleships_setup()
         battleships_show_ship_placer()
         return
-    } else if (config_split[0] === "LOST") {
+    } else if (state === "LOST") {
         battleship_status = "stopped"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Lost!</strong></font></div>";
         battleships_setup()
         battleships_show_ship_placer()
         return
+    } else if (state === "RUNNING") {
+        battleship_status = "RUNNING"
+        battleships_setup()
+        battleships_show_turn()
     }
-    var ships = config_split[1].split("~")
-    for (var i = 0; i < ships.length; i++) {
-        var ship = ships[i]
+    console.log("BSH chunking ships now ...", JSON.stringify(ships))
+    var shipPositions = splitIntoChunks(ships, 3)
+    console.log("BSH chunky ships: ", JSON.stringify(shipPositions))
+    for (var i = 0; i < shipPositions.length; i++) {
+        console.log("BSH Processing Ship: ", shipPositions[i])
+        var ship = shipPositions[i]
         var x = parseInt(ship.charAt(0))
         var y = parseInt(ship.charAt(1))
         if (x != -1) {
             battleships_placed_ships++
-            battleships_ship_positions = battleships_ship_positions + "~" + ship
+            battleships_ship_positions = battleships_ship_positions + "" + ship
         }
         var direction = ship.slice(2, 100)
         for (var j = 0; j < battleship_ship_lengths[i]; j++) {
             var position = y * 10 + x + 1
-            if (direction === "UP") {
+            if (direction === "U") {
                 position = position - 10 * j
-            } else if (direction === "DOWN") {
+            } else if (direction === "D") {
                 position = position + 10 * j
-            } else if (direction === "LEFT") {
+            } else if (direction === "L") {
                 position = position - j
-            } else if (direction === "RIGHT") {
+            } else if (direction === "R") {
                 position = position + j
             }
             var field = document.getElementById("battleships:top" + position)
@@ -381,7 +274,7 @@ function battleships_load_config(config) {
             field.onclick = null
         }
     }
-    var shots_fired = config_split[2].split("~")
+    var shots_fired = splitIntoChunks(delivered, 3)
     for (var i = 0; i < shots_fired.length; i++) {
         var shot = shots_fired[i]
         if (shot === "") {
@@ -392,17 +285,17 @@ function battleships_load_config(config) {
         var outcome = shot.slice(2, 100)
         var position = y * 10 + x + 1
         var field = document.getElementById("battleships:bottom" + position)
-        if (outcome === "MISS") {
+        if (outcome === "M") {
             field.className = "miss"
-        } else if (outcome === "HIT") {
+        } else if (outcome === "H") {
             field.className = "hit"
-        } else if (outcome === "SUNKEN") {
+        } else if (outcome === "S") {
             field.className = "sunken"
         }
         field.innerHTML = ""
         field.onclick = null
     }
-    var shots_received = config_split[3].split("~")
+    var shots_received = splitIntoChunks(recv, 3)
     for (var i = 0; i < shots_received.length; i++) {
         var shot = shots_received[i]
         if (shot === "") {
@@ -413,20 +306,40 @@ function battleships_load_config(config) {
         var outcome = shot.slice(2, 100)
         var position = y * 10 + x + 1
         var field = document.getElementById("battleships:top" + position)
-        if (outcome === "MISS") {
+        if (outcome === "M") {
             field.className = "miss"
-        } else if (outcome === "HIT") {
+        } else if (outcome === "H") {
             field.className = "hit"
-        } else if (outcome === "SUNKEN") {
+        } else if (outcome === "S") {
             field.className = "sunken"
         }
         field.innerHTML = ""
         field.onclick = null
     }
-    if (config_split[0] === "WAITING") {
+    if (state === "WAITING") {
         battleships_show_waiting()
         return
     }
     battleships_set_turn(config_split[4] === "true")
     battleships_show_turn()
+}
+
+/*
+*   This method parses the ships into readable format.
+*/
+function splitIntoChunks(str, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < str.length; i += chunkSize) {
+        chunks.push(str.substring(i, i + chunkSize));
+    }
+    return chunks;
+}
+
+function reset_battleship_mode() {
+    battleships_turn = null
+    battleships_ship_positions = ""
+    battleship_status = "STOPPED"
+
+    owner = ""
+    peer = ""
 }

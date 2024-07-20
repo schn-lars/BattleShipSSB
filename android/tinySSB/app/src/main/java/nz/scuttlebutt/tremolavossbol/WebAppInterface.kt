@@ -25,6 +25,7 @@ import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_KANBA
 import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions.Companion.toBase64
 import nz.scuttlebutt.tremolavossbol.utils.HelperFunctions.Companion.toHex
 import nz.scuttlebutt.tremolavossbol.tssb.games.GamesHandler
+import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_GAMETEXT
 import org.json.JSONArray
 
@@ -253,44 +254,51 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                 }
             }
             "games" -> { // Handle battleship communication
-                Log.d("GAM - WebApp", s)
+                Log.d("GAM - WebApp", args.toString())
                 //gamesHandler.processGameRequest(s.substring(6))
                 // TODO here you can add restrictions, if a command is not allowed
                 // TODO -> INVACC <OID> <PID> <ADD HASH>
-                val msg = Base64.decode(args[1], Base64.NO_WRAP).decodeToString()
-                args = msg.split(' ')
-                Log.d("new Args", args.toString())
-                if (args[0] == "BSH") {
-                    when (args[1]) {
+                val msg = Base64.decode(args[1], Base64.NO_WRAP).decodeToString().split(" ")
+                //Log.d("BSH new msg: ", msg)
+                //args = msg.split(' ')
+                if (args[1] == "BSH") {
+                    when (args[2]) {
                         "INV" -> {
+                            if (gamesHandler.getInviteCount("BSH") != 0) {
+                                Log.d("BSH-Handler INV", "inviteCounter is not 0")
+                                return
+                            }
+                            gameHandler.incInviteCount("BSH")
                             //Log.d("INV Keys", "${gamesHandler.myId.toRef()} ${args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")}")
-                            gamesHandler.addOwnGame(args[0], args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519"))
-                            val inst = gamesHandler.getInstanceFromFid(args[0], args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519"))
+                            gamesHandler.addOwnGame(args[1], args[3], GameStates.INVITED)
+                            val inst = gamesHandler.getInstanceFromFid(args[1], args[3])
+                            //gamesHandler.addOwnGame(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"), GameStates.INVITED)
+                            //val inst = gamesHandler.getInstanceFromFid(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"))
                             (inst!!.game as BattleshipGame).setupGame(true)
                             val hash = (inst.game as BattleshipGame).getShipPosition()
-                            val req = "${args[0]} INV ${args[2]} $hash"
+                            val req = "${args[1]} INV ${args[3]} $hash"
                             public_post_game_request(Base64.encodeToString(req.toByteArray(), Base64.NO_WRAP))
                             return
                         }
                         "INVACC" -> {
-                            val inst = gameHandler.getInstanceFromFids("BSH", args[2], args[3])
+                            val inst = gamesHandler.getInstanceFromFid("BSH", args[3])
                             var peerHash: String = ""
                             if (inst != null) {
                                 (inst.game as BattleshipGame).setupGame(false)
                                 peerHash = (inst.game as BattleshipGame).getShipPosition()
                             }
 
-                            val invacc = "$s $peerHash" // Appending Peer's Shiphash
+                            val invacc = "BSH INVACC ${args[3]} ${gamesHandler.myId.toRef()} $peerHash" // Appending Peer's Shiphash
                             Log.d("GAM APP (INVACC)", invacc)
                             public_post_game_request(Base64.encodeToString(invacc.toByteArray(), Base64.NO_WRAP))
                             return
                         }
                         "SHOT" -> {
-                            val inst = gameHandler.getInstanceFromFids("BSH", args[2], args[3])
+                            val inst = gamesHandler.getInstanceFromFids("BSH", msg[2], msg[3])
                             var isPeer: String = ""
-                            if (gamesHandler.myId.toRef() == args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")) { // I am owner
+                            if (gamesHandler.isIdEqualToMine(msg[2])) { // I am owner
                                 isPeer = "0"
-                            } else if (gamesHandler.myId.toRef() == args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519")) {
+                            } else if (gamesHandler.isIdEqualToMine(msg[3])) {
                                 isPeer = "1"
                             } else {
                                 return
@@ -301,24 +309,24 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                             } else {
                                 return
                             }
-                            val shot = "${args[0]} ${args[1]} ${args[2]} ${args[3]} $isPeer ${args[4]}"
+                            val shot = "${msg[0]} ${msg[1]} ${msg[2]} ${msg[3]} $isPeer ${msg[4]}"
                             Log.d("GAM APP (SHOT)", shot)
                             public_post_game_request(Base64.encodeToString(shot.toByteArray(), Base64.NO_WRAP))
                         }
                         "DUELQUIT" -> {
-                            val inst = gameHandler.getInstanceFromFids("BSH", args[2], args[3])
+                            val inst = gamesHandler.getInstanceFromFids("BSH", msg[2], msg[3])
                             var isPeer: String = ""
-                            if (gamesHandler.myId.toRef() == args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")) { // I am owner
+                            if (gamesHandler.isIdEqualToMine(msg[2])) { // I am owner
                                 isPeer = "0"
-                            } else if (gamesHandler.myId.toRef() == args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519")) {
+                            } else if (gamesHandler.isIdEqualToMine(msg[3])) {
                                 isPeer = "1"
                             }
-                            val quit = "${args[0]} ${args[1]} ${args[2]} ${args[3]} $isPeer"
+                            val quit = "${msg[0]} ${msg[1]} ${msg[2]} ${msg[3]} $msg"
                             Log.d("GAM APP (SHOT)", quit)
                             public_post_game_request(Base64.encodeToString(quit.toByteArray(), Base64.NO_WRAP))
                         }
                         else -> {
-                            public_post_game_request(s.substring(6))
+                            public_post_game_request(Base64.encodeToString(s.substring(6).toByteArray(), Base64.NO_WRAP))
                         }
                     }
                 }

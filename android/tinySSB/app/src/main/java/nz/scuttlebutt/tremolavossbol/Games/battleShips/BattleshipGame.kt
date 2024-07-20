@@ -32,7 +32,7 @@ class BattleshipGame : Game {
             5
         )
     var gameState: GameState? = null
-    override var state: GameStates = GameStates.STOPPED
+    override var state: GameStates = GameStates.INVITED
     override var isRunning: Boolean = false
 
     /**
@@ -200,8 +200,8 @@ class BattleshipGame : Game {
     /**
      * Returns the shots you fired along with the outcomes in a list
      */
-    fun shotsFiredWithOutcome(): MutableList<Pair<Position2D, ShotOutcome>> {
-        return gameState!!.shotsFiredWithOutcome()
+    fun shotsFiredWithOutcome(): String {
+        return gameState!!.shotsFiredWithOutcomeToString()
     }
 
 

@@ -6,6 +6,7 @@ import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.BattleshipHandler
 import android.util.Base64
 import nz.scuttlebutt.tremolavossbol.crypto.SSBid
 import nz.scuttlebutt.tremolavossbol.games.battleShips.BattleshipGame
+import nz.scuttlebutt.tremolavossbol.tssb.games.battleships.GameStates
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -19,7 +20,46 @@ class GamesHandler(identity: SSBid) {
     private val instances: MutableList<GameInstance> = mutableListOf()
     // Currently selected game. Each client can only have one active at a time.
     private var activeInstance: GameInstance? = null
-    private var battleshipHandler: BattleshipHandler? = null
+    private var battleshipHandler: BattleshipHandler = BattleshipHandler(this)
+
+
+    /**
+     * This method returns the number of pending invites for a specified gamemode.
+     */
+    fun getInviteCount(gameType: String): Int {
+        when (gameType) {
+            "BSH" -> {
+                return battleshipHandler.inviteCounter
+            }
+        }
+        return -1
+    }
+
+    fun decInviteCount(gameType: String): Boolean {
+        when (gameType) {
+            "BSH" -> {
+                if (battleshipHandler.inviteCounter == 1) {
+                    battleshipHandler.inviteCounter--
+                    return true
+                }
+                return false
+            }
+        }
+        return false
+    }
+
+    fun incInviteCount(gameType: String): Boolean {
+        when (gameType) {
+            "BSH" -> {
+                if (battleshipHandler.inviteCounter == 0) {
+                    battleshipHandler.inviteCounter++
+                    return true
+                }
+                return false
+            }
+        }
+        return false
+    }
 
     /**
      * This function verifies, if a participant can add a new game with the given parameters.
@@ -97,6 +137,10 @@ class GamesHandler(identity: SSBid) {
         }
     }
 
+    /**
+     * This method gets called, as soon as you want to open the Game-GUI.
+     */
+    // TODO change depending on game mode
     private fun getInstanceDescriptor(i: GameInstance): String {
         var myTurn: String = "0"
 
@@ -106,16 +150,19 @@ class GamesHandler(identity: SSBid) {
         if ((i.game as BattleshipGame).gameState?.isMyTurn() == true) {
             myTurn = "1";
         }
-        return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state} $myTurn"
+        val serialized = (i.game as BattleshipGame).serialize()
+        //val recv = (i.game as BattleshipGame).gameState!!.shotsReceivedWithOutcomeToString()
+        //val deliv = (i.game as BattleshipGame).gameState!!.shotsFiredWithOutcomeToString()
+        return "$i ${i.ownerFid} ${i.participantFid} ${i.startTime} ${i.state} $myTurn $serialized"
     }
 
     /**
      * Adds a new gameinstance to the list. Returns the index of the created instance.
      * You can always create a new game. Limitation only kicks in on participant's side.
      */
-    fun addOwnGame(gameType: String, ownerFid: String): Int {
+    fun addOwnGame(gameType: String, ownerFid: String, initialState: GameStates): Int {
         val currentTime = System.currentTimeMillis()
-        addInstanceToList(GameInstance(gameType, ownerFid, myId, currentTime))
+        addInstanceToList(GameInstance(gameType, ownerFid, currentTime, initialState))
         count++
         return instances.size
     }
@@ -142,6 +189,7 @@ class GamesHandler(identity: SSBid) {
     }
 
     fun isIdEqualToMine(id: String): Boolean {
+        Log.d("BSH isEqualToMine", myId.toRef() + " " + id)
         return myId.toRef() == id
     }
 
