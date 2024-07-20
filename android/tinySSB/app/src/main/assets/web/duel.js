@@ -128,6 +128,12 @@ function battleships_setup() {
             counter++
         }
     }
+
+    if (battleship_status == "INVITED") {
+        var turn = document.getElementById("battleships:turn")
+        turn.style.display = null
+        turn.innerHTML = "Waiting for Invite to be accepted!"
+    }
 }
 
 function battleships_set_turn(is_turn) {

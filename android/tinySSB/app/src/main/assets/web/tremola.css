@@ -801,7 +801,7 @@ button.square:active {
 }
 
 .battleshipsTopRow {
-    background: #000896;
+    background: #50A4D3;
     color: white;
     font-weight: bold;
     display: flex;
@@ -810,7 +810,7 @@ button.square:active {
 }
 
 .battleshipsLeftRow {
-    background: #000896;
+    background: #50A4D3;
     color: white;
     font-weight: bold;
     display: flex;
@@ -831,7 +831,7 @@ button.square:active {
 }
 
 .field {
-    background: LightBlue;
+    background: #ACCADF;
     border-right: 1px solid Blue;
     border-top: 1px solid Blue;
     display: flex;
@@ -938,7 +938,7 @@ button.square:active {
     font-size: 1.3em;
     padding: 15px;
     margin-top: 10px;
-    background-color: #00c9ff;
+    background-color: #50A4D3;
     border: none;
     border-radius: 15px;
     color: #fff;
