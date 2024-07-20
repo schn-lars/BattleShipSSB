@@ -71,12 +71,19 @@ function battleships(turn, ships_fired_recv) {
     closeOverlay();
     setScenario("battleships")
 
+    var turn = document.getElementById("battleships:turn")
+    turn.style.display = null
+    turn.innerHTML = "Waiting waiting"
+
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
     c.innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
 
     battleships_load_config(battleship_status, args[0], args[1], args[2]);
 
+    var turn = document.getElementById("battleships:turn")
+    turn.style.display = null
+    turn.innerHTML = "Waiting for other"
     //battleships_show_turn()
 }
 
@@ -141,11 +148,10 @@ function battleships_setup() {
         }
     }
 
-    if (battleship_status == "INVITED") {
-        var turn = document.getElementById("battleships:turn")
-        turn.style.display = null
-        turn.innerHTML = "Waiting for Invite to be accepted!"
-    }
+    var turn = document.getElementById("battleships:turn")
+    turn.style.display = null
+    turn.innerHTML = "Waiting"
+
 }
 
 function battleships_set_turn(is_turn) {
