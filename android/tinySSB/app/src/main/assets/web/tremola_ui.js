@@ -242,7 +242,7 @@ function show_duels() {
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
 
-    c.innerHTML = "<div style='text-align: center;'><font size=+1><strong>Duels</strong></font></div>";
+    c.innerHTML = "<div style='text-align: center;'><font size=+3><strong>Duels</strong></font></div>";
     var container = document.getElementById("duels-container");
     container.innerHTML = "";
 
@@ -259,7 +259,8 @@ function show_duels() {
     if (gameListString === "") {
         console.log('show_duels ', JSON.stringify("No active duels found."));
         var noDuelDiv = document.createElement("div");
-        noDuelDiv.innerHTML = "No active duels available.";
+        noDuelDiv.className = "no-duel-box";
+        noDuelDiv.innerHTML = "No active duels available...";
         container.appendChild(noDuelDiv);
     } else {
         var gameList = gameListString.split('$');
@@ -305,9 +306,6 @@ function show_duels() {
             var gameDiv = document.createElement("button");
             gameDiv.className = "duel-button";
             gameDiv.onclick = () => onDuelButtonClicked(game);
-//            gameDiv.style.display = "flex";
-//            gameDiv.style.alignItems = "center";
-//            gameDiv.style.marginBottom = "10px";
 
             // Change background color based on state
             if (state === 'STOPPED') {
