@@ -71,19 +71,17 @@ function battleships(turn, ships_fired_recv) {
     closeOverlay();
     setScenario("battleships")
 
-    var turn = document.getElementById("battleships:turn")
-    turn.style.display = null
-    turn.innerHTML = "Waiting waiting"
-
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
     c.innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
 
     battleships_load_config(battleship_status, args[0], args[1], args[2]);
 
-    var turn = document.getElementById("battleships:turn")
-    turn.style.display = null
-    turn.innerHTML = "Waiting for other"
+    if (battleship_status == "INVITED") {
+        var turn = document.getElementById("battleships:turn")
+        turn.style.display = null
+        turn.innerHTML = "Waiting for other"
+    }
     //battleships_show_turn()
 }
 
@@ -147,11 +145,6 @@ function battleships_setup() {
             counter++
         }
     }
-
-    var turn = document.getElementById("battleships:turn")
-    turn.style.display = null
-    turn.innerHTML = "Waiting"
-
 }
 
 function battleships_set_turn(is_turn) {
@@ -203,7 +196,7 @@ function battleships_show_turn() {
         } else if (battleship_status == "STOPPED") {
             turn.innerHTML = "The game is stopped!"
         } else if (battleship_status == "INVITED") {
-            turn.innerHTML = "Waiting for Invite to be accepted!"
+            turn.innerHTML = "Waiting for other!"
         } else if (battleship_status == "WAITING") {
             if (peerId == "-") {
                 turn.innerHTML = "Waiting ..."
@@ -254,13 +247,13 @@ function battleships_load_config(state, ships, deliv, recv) {
         battleships_show_invited_button()
         //return
     } else if (state === "WON") {
-        battleship_status = "stopped"
+        battleship_status = "WON"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Won!</strong></font></div>";
         battleships_setup()
         battleships_show_ship_placer()
         return
     } else if (state === "LOST") {
-        battleship_status = "stopped"
+        battleship_status = "LOST"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Lost!</strong></font></div>";
         battleships_setup()
         battleships_show_ship_placer()
