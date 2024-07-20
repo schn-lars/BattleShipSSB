@@ -267,7 +267,9 @@ function show_duels() {
             var gameParts = game.split(" ");
             var name = gameParts[0];
             var owner = gameParts[1];
+            var ownerAlias = tremola.contacts[owner].alias;
             var participant = gameParts[2];
+            var participantAlias = tremola.contacts[participant].alias;
             var startTimeRaw = parseInt(gameParts[3]);;
             // Format start time
             var date = new Date(startTimeRaw);
@@ -286,10 +288,10 @@ function show_duels() {
             console.log('My Id: ', JSON.stringify(myId));
             var suffix = ".ed25519";
             if (owner == myId) {
-                owner = "Me";
+                ownerAlias = "Me";
                 participant = id2b32(participant);
             } else if (participant == myId) {
-                participant = "Me";
+                participantAlias = "Me";
                 owner = id2b32(owner);
             } else {
                 participant = id2b32(participant);
@@ -335,29 +337,12 @@ function show_duels() {
             img.className = "duel-image";
             gameDiv.appendChild(img);
 
-
-//            var textDiv = document.createElement("div");
-//            textDiv.style.flexGrow = "1";
-//            var text = document.createElement("textarea");
-//            text.rows = 3;
-//            text.value = `Owner: ${owner}\nParticipant: ${participant}\nStart Time: ${startTime}`;
-//            text.style.width = "100%";
-//            textDiv.appendChild(text);
-
             // Create text for duel button
             const span = document.createElement("span");
             span.className = "duel-text";
-            span.innerHTML = `Owner: ${owner}<br>Participant: ${participant}<br>Start Time: ${startTime}<br>State: ${state}`;
+            span.innerHTML = `Owner: ${ownerAlias}<br>Participant: ${participantAlias}<br>Start Time: ${startTime}<br>State: ${state}`;
 
-//           var button = document.createElement("button");
-//           button.innerText = state;
-//           button.style.marginLeft = "10px";
-//           button.onclick = function() {
-//               onDuelButtonClicked(game);
-//           };
-//
             gameDiv.appendChild(span);
-//            gameDiv.appendChild(button);
 
             container.appendChild(gameDiv);
         });
