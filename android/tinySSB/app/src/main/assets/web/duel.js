@@ -182,7 +182,7 @@ function battleships_show_turn() {
     turn.style.display = null
 
     console.log("BSH Determining what to display as turn ...")
-    turn.className = ''; // Reset classes
+    turn.classList.add('turn-default');
     if (peerId == owner || peerId == peer) {
         if (battleship_status == "WON") {
             turn.innerHTML = "You Won!";
@@ -205,10 +205,10 @@ function battleships_show_turn() {
         } else if (battleship_status == "RUNNING") {
             if (battleships_turn) {
                 turn.innerHTML = "Your Turn";
-                turn.classList.add('turn-default');
+                turn.classList.add('turn-your');
             } else {
                 turn.innerHTML = "Enemy Turn";
-                turn.classList.add('turn-default');
+                turn.classList.add('turn-enemy');
             }
         }
     } else {

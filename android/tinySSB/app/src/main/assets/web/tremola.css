@@ -745,7 +745,7 @@ button.square:active {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  max-width: 600px;
+  max-width: 550px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -968,9 +968,19 @@ button.square:active {
     color: white;
 }
 
+.turn-your {
+    background-color: d4edda;
+    color: white;
+}
+
+.turn-enemy {
+    background-color: f8d7da;
+    color: white;
+}
+
 .turn-default {
-    background-color: initial;
-    color: initial;
+    background-color: #50A4D3;
+    color: #fff;
 }
 
 .battleships_orientation_button {
