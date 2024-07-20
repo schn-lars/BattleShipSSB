@@ -347,13 +347,17 @@ function show_duels() {
     }
 }
 
+/**
+*   Triggered when you click
+*/
 function onDuelButtonClicked(duelString) {
   console.log("Button clicked for: " + JSON.stringify(duelString));
   console.log("myId: ", JSON.stringify(myId));
   var duelList = duelString.split(" ");
   game = duelList[0]
   console.log("owner: ", JSON.stringify(duelList[1]));
-  switch (duelList[4]) {
+  battleship_status = duelList[4]
+  switch (battleship_status) {
     case "STOPPED":
         return;
     case "INVITED":
@@ -363,7 +367,6 @@ function onDuelButtonClicked(duelString) {
             // TODO possibly add cooldown
         } else {
             // TODO open game to see ships
-            battleship_status = "INVITED";
             owner = duelList[1];
             battleships(null, duelList[6]);
         }
@@ -384,7 +387,6 @@ function onDuelButtonClicked(duelString) {
         battleships(false, duelList[6]);
         return;
     case "RUNNING":
-        battleship_status = "RUNNING"
         owner = duelList[1];
         peer = duelList[2];
         if (duelList[5] == "0") {

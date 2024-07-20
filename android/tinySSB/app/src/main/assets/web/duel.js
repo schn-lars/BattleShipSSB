@@ -3,7 +3,7 @@
 var battleships_turn = false
 var battleships_horizontal = true
 var battleships_ship_positions = ""
-var battleship_ship_lengths = [2, 3, 3, 4 ,5]
+var battleship_ship_lengths = [2] // [2, 3, 3, 4 ,5]
 var battleship_status = "stopped"
 
 var owner = ""
@@ -77,11 +77,11 @@ function battleships(turn, ships_fired_recv) {
 
     battleships_load_config(battleship_status, args[0], args[1], args[2]);
 
-    if (battleship_status == "INVITED") {
-        var turn = document.getElementById("battleships:turn")
-        turn.style.display = null
-        turn.innerHTML = "Waiting for other"
-    }
+    //if (battleship_status == "INVITED") {
+    //    var turn = document.getElementById("battleships:turn")
+    //    turn.style.display = null
+    //    turn.innerHTML = "Waiting for other"
+    //}
     //battleships_show_turn()
 }
 
@@ -183,7 +183,7 @@ function battleships_show_turn() {
     console.log("BSH Showing Turn...")
     battleships_hide_controls()
     var peerId = myId;
-    if (battleships_turn == null) { return; }
+    //if (battleships_turn == null && battleship_status != "INVITED") { return; }
     var turn = document.getElementById("battleships:turn")
     turn.style.display = null
 
@@ -196,6 +196,7 @@ function battleships_show_turn() {
         } else if (battleship_status == "STOPPED") {
             turn.innerHTML = "The game is stopped!"
         } else if (battleship_status == "INVITED") {
+            console.log("BSH invite-button init ...")
             turn.innerHTML = "Waiting for other!"
         } else if (battleship_status == "WAITING") {
             if (peerId == "-") {
@@ -239,27 +240,22 @@ function battleships_load_config(state, ships, deliv, recv) {
     battleships_ship_positions = ""
     console.log("BSH_load_config", JSON.stringify(state + " " + ships + " " + recv + " " + deliv));
     if (state === "STOPPED") {
+        document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Red;'><font size=+2><strong>Stopped Game!</strong></font></div>";
         battleships_setup()
-        battleships_show_ship_placer()
-        return
+        battleships_show_turn()
     } else if (state === "INVITED") {
         battleships_setup()
-        battleships_show_invited_button()
+        battleships_show_turn()
         //return
     } else if (state === "WON") {
-        battleship_status = "WON"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Won!</strong></font></div>";
         battleships_setup()
-        battleships_show_ship_placer()
-        return
+        battleships_show_turn()
     } else if (state === "LOST") {
-        battleship_status = "LOST"
         document.getElementById("conversationTitle").innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>You Lost!</strong></font></div>";
         battleships_setup()
-        battleships_show_ship_placer()
-        return
+        battleships_show_turn()
     } else if (state === "RUNNING") {
-        battleship_status = "RUNNING"
         battleships_setup()
         battleships_show_turn()
     }
@@ -338,7 +334,7 @@ function battleships_load_config(state, ships, deliv, recv) {
         field.onclick = null
     }
     if (state === "WAITING") {
-        battleships_show_waiting()
+        battleships_show_turn()
         return
     }
     //battleships_set_turn(config_split[4] === "true")

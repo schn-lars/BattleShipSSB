@@ -23,14 +23,7 @@ import kotlin.random.Random
  *      9           ~   ~   ~   ~   ~   ~   ~   ~   ~   ~
  */
 class BattleshipGame : Game {
-    private val DEFAULT_CONFIG =
-        arrayOf(
-            2,
-            3,
-            3,
-            4,
-            5
-        )
+    private val DEFAULT_CONFIG = arrayOf(2) // arrayOf(2, 3, 3, 4, 5)
     var gameState: GameState? = null
     override var state: GameStates = GameStates.INVITED
     override var isRunning: Boolean = false

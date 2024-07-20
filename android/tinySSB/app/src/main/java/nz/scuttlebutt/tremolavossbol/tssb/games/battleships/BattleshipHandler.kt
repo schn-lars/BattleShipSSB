@@ -88,7 +88,7 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                 } else if (!gamesHandler.isIdEqualToMine(ownerID)) {
                     val inst = gamesHandler.getInstanceFromFid("BSH", ownerID)
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.SPEC
+                        inst.state = GameStates.SPEC
                         inst.participantFid = peerID
                     }
                 }
@@ -143,7 +143,7 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                             return "games BSH SHOTDEC $ownerID $peerID ${(inst.game as BattleshipGame).gameState!!.shotReceived}"
                         }
                         if ((inst.game as BattleshipGame).gameState!!.enemyHasWon()) {
-                            (inst.game as BattleshipGame).state = GameStates.LOST
+                            inst.state = GameStates.LOST
                             return "games BSH DUELWON $ownerID $peerID 0"
                         }
                         // TODO update received shots
@@ -162,7 +162,7 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                             return "games BSH SHOTDEC $ownerID $peerID"
                         }
                         if ((inst.game as BattleshipGame).gameState!!.enemyHasWon()) {
-                            (inst.game as BattleshipGame).state = GameStates.LOST
+                            inst.state = GameStates.LOST
                             return "games BSH DUELWON $ownerID $peerID 1"
                         }
                         // TODO update received shots
@@ -238,13 +238,13 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                 val inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
                 if (gamesHandler.isIdEqualToMine(ownerID) && isPeer == "1") { // Owner Won
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.WON
+                        inst.state = GameStates.WON
                     }
                     // TODO null setzen instance? Was passiert mit fertigen Games?
                     gamesHandler.decInviteCount("BSH")
                 } else if (gamesHandler.isIdEqualToMine(peerID) && isPeer == "0") { // Peer has won
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.WON
+                        inst.state = GameStates.WON
                     }
                 }
                 return ""
@@ -258,16 +258,16 @@ class BattleshipHandler(val gameHandler: GamesHandler) {
                 val inst = gamesHandler.getInstanceFromFids("BSH", ownerID, peerID)
                 if (gamesHandler.isIdEqualToMine(ownerID) && isPeer == "1") { // Peer Quit
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                        inst.state = GameStates.STOPPED
                     }
                     gamesHandler.decInviteCount("BSH")
                 } else if (gamesHandler.isIdEqualToMine(peerID) && isPeer == "0") { // Owner Quit
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                        inst.state = GameStates.STOPPED
                     }
                 } else {
                     if (inst != null) {
-                        (inst.game as BattleshipGame).state = GameStates.STOPPED
+                        inst.state = GameStates.STOPPED
                     }
                 }
                 return ""
