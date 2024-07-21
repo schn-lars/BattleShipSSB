@@ -196,27 +196,39 @@ function battleships_show_waiting() {
 
 // Shows the turn indicator below the grid
 function battleships_show_turn() {
-    console.log("BSH Showing Turn...")
-    battleships_hide_controls()
+    console.log("BSH Showing Turn...");
+    battleships_hide_controls();
     var peerId = myId;
-    //if (battleships_turn == null && battleship_status != "INVITED") { return; }
-    var turn = document.getElementById("battleships:turn")
-    turn.style.display = null
+    var turn = document.getElementById("battleships:turn");
+    turn.style.display = null;
 
-    console.log("BSH Determining what to display as turn ...")
-    turn.classList.add('turn-default');
+    console.log("BSH Determining what to display as turn ...");
+
+    // Set default styles
+    turn.style.width = '70vw';
+    turn.style.textAlign = 'center';
+    turn.style.fontSize = '1.3em';
+    turn.style.padding = '15px';
+    turn.style.marginTop = '10px';
+    turn.style.border = 'none';
+    turn.style.borderRadius = '15px';
+    turn.style.backgroundColor = '#50A4D3';
+    turn.style.color = '#fff';
+
     if (peerId == owner || peerId == peer) {
         if (battleship_status == "WON") {
             turn.innerHTML = "You Won!";
-            turn.classList.add('turn-won');
+            turn.style.backgroundColor = 'green';
+            turn.style.color = 'white';
         } else if (battleship_status == "LOST") {
             turn.innerHTML = "You Lost!";
-            turn.classList.add('turn-lost');
+            turn.style.backgroundColor = 'red';
+            turn.style.color = 'white';
         } else if (battleship_status == "STOPPED") {
             turn.innerHTML = "The game is stopped!";
         } else if (battleship_status == "INVITED") {
-            console.log("BSH invite-button init ...")
-            turn.innerHTML = "Waiting for other!"
+            console.log("BSH invite-button init ...");
+            turn.innerHTML = "Waiting for other!";
         } else if (battleship_status == "WAITING") {
             if (peerId == "-") {
                 turn.innerHTML = "Waiting ...";
@@ -224,10 +236,12 @@ function battleships_show_turn() {
         } else if (battleship_status == "RUNNING") {
             if (battleships_turn) {
                 turn.innerHTML = "Your Turn";
-                turn.classList.add('turn-your');
+                turn.style.backgroundColor = '#d4edda'; // Light green
+                turn.style.color = 'black';
             } else {
                 turn.innerHTML = "Enemy Turn";
-                turn.classList.add('turn-enemy');
+                turn.style.backgroundColor = '#f8d7da'; // Light red
+                turn.style.color = 'black';
             }
         }
     } else {
@@ -237,14 +251,16 @@ function battleships_show_turn() {
             } else {
                 turn.innerHTML = "Peer has Won!";
             }
-            turn.classList.add('turn-won');
+            turn.style.backgroundColor = 'green';
+            turn.style.color = 'white';
         } else if (battleship_status == "LOST") {
             if (battleships_turn) {
                 turn.innerHTML = "Owner has Lost!";
             } else {
                 turn.innerHTML = "Peer has Lost!";
             }
-            turn.classList.add('turn-lost');
+            turn.style.backgroundColor = 'red';
+            turn.style.color = 'white';
         } else {
             if (battleships_turn) {
                 turn.innerHTML = "Owner's Turn!";
