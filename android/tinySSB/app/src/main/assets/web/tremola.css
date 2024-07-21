@@ -774,7 +774,7 @@ button.square:active {
 }
 
 .duel-button-running {
-    background-color: #d4edda; /* light green */
+    background-color: #fff3cd; /* light green */
 }
 
 .duel-button-waiting {
