@@ -275,8 +275,7 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                             //gamesHandler.addOwnGame(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"), GameStates.INVITED)
                             //val inst = gamesHandler.getInstanceFromFid(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"))
                             (inst!!.game as BattleshipGame).setupGame(true)
-                            val hash = (inst.game as BattleshipGame).getShipPosition()
-                            val req = "${args[1]} INV ${args[3]} $hash"
+                            val req = "${args[1]} INV ${args[3]} ${inst.startTime}"
                             public_post_game_request(Base64.encodeToString(req.toByteArray(), Base64.NO_WRAP))
                             return
                         }

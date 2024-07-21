@@ -3,8 +3,9 @@
 var battleships_turn = false
 var battleships_horizontal = true
 var battleships_ship_positions = ""
-var battleship_ship_lengths = [2] // [2, 3, 3, 4 ,5]
+var battleship_ship_lengths = [2, 3, 3, 4 ,5]
 var battleship_status = "STOPPED"
+var battleship_timestamp = "0"
 
 var owner = "-"
 var peer = "-"
@@ -63,7 +64,7 @@ function update_game_gui(response) {
             if (peer == "-") {
                 instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFid(game, owner)
             } else {
-                instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer)
+                instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer, battleship_timestamp)
             }
             console.log("BSH update_gui ", JSON.stringify(instanceDescriptor))
             var instanceList = instanceDescriptor.split(" ")
@@ -395,6 +396,7 @@ function reset_battleship_mode() {
     battleships_turn = null
     battleships_ship_positions = ""
     battleship_status = "STOPPED"
+    battleship_timestamp = "0"
     game = "-"
 
     owner = "-"

@@ -354,6 +354,7 @@ function onDuelButtonClicked(duelString) {
   var duelList = duelString.split(" ");
   game = duelList[0]
   console.log("owner: ", JSON.stringify(duelList[1]));
+  battleship_timestamp = duelList[3]
   battleship_status = duelList[4]
   switch (battleship_status) {
     case "STOPPED":

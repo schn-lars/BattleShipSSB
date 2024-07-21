@@ -80,6 +80,15 @@ class GamesHandler(identity: SSBid) {
     /**
      * Returns an instance of a game (if exist) for given parameters.
      */
+    fun getInstanceFromFids(gameType: String, oID: String, pID: String, timeStamp: Long): GameInstance? {
+        for (game in instances) {
+            if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType && game.startTime == timeStamp) {
+                return game
+            }
+        }
+        return null
+    }
+
     fun getInstanceFromFids(gameType: String, oID: String, pID: String): GameInstance? {
         for (game in instances) {
             if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType && game.state.isActive()) {
@@ -141,8 +150,8 @@ class GamesHandler(identity: SSBid) {
      * This method is used to react to incoming messages regarding updating the GUI.
      */
     @JavascriptInterface
-    fun getInstanceDescriptorFromFids(gameType: String, oID: String, pID: String): String {
-        val instance: GameInstance? = getInstanceFromFids(gameType, oID, pID)
+    fun getInstanceDescriptorFromFids(gameType: String, oID: String, pID: String, timeStamp: String): String {
+        val instance: GameInstance? = getInstanceFromFids(gameType, oID, pID, timeStamp.toLong())
         if (instance == null) {
             return ""
         } else {

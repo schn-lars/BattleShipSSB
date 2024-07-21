@@ -10,6 +10,7 @@ class GameState(
     var turn: Boolean,
     shipSizes: Array<Int>
 ) {
+    private val sizes: Array<Int> = shipSizes
     private val ships =
         Array(
             shipSizes.size
@@ -138,6 +139,57 @@ class GameState(
             it.first == shotPosition
         }
         shotsFiredWithOutcome.add(Pair(Position2D(x, y), shotOutcome))
+        if (shotOutcome == ShotOutcome.SUNKEN) {
+            changeHitsToSunken(x, y)
+        }
+    }
+
+    fun splitIntoChunks(input: String, chunkSize: Int): List<String> {
+        val chunks = mutableListOf<String>()
+        var index = 0
+        while (index < input.length) {
+            val endIndex = Math.min(index + chunkSize, input.length)
+            chunks.add(input.substring(index, endIndex))
+            index += chunkSize
+        }
+        return chunks
+    }
+
+    fun getShipPositions(ship: String, length: Int): List<Position2D> {
+        val positions = mutableListOf<Position2D>()
+        val x = ship[0].digitToInt()
+        val y = ship[1].digitToInt()
+        val direction = ship[2]
+
+        for (i in 0 until length) {
+            when (direction) {
+                'U' -> positions.add(Position2D(x, y - i))
+                'D' -> positions.add(Position2D(x, y + i))
+                'L' -> positions.add(Position2D(x - i, y))
+                'R' -> positions.add(Position2D(x + i, y))
+            }
+        }
+        return positions
+    }
+
+    fun changeHitsToSunken(x: Int, y: Int) {
+        val enemyShips = splitIntoChunks(enemyHash ?: "", 3)
+        var iteration = 0
+
+        while (iteration < enemyShips.size) {
+            val ship = enemyShips[iteration]
+            val shipPositions = getShipPositions(ship, sizes[iteration])
+
+            // Prüfen, ob die Position (x, y) zu diesem Schiff gehört
+            if (shipPositions.contains(Position2D(x, y))) {
+                // Aktualisieren der Positionen zu SUNKEN
+                shipPositions.forEach { pos ->
+                    shotsFiredWithOutcome.removeIf { it.first == pos }
+                    shotsFiredWithOutcome.add(Pair(pos, ShotOutcome.SUNKEN))
+                }
+            }
+            iteration += 1
+        }
     }
 
     /**
