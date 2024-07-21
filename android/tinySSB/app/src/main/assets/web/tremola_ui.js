@@ -59,7 +59,7 @@ var scenarioMenu = {
         ['(un)Forget', 'menu_forget_conv'],
         ['Settings', 'menu_settings'],
         ['About', 'menu_about'], // BATTLESHIP ADDED
-        ['Current Duels', 'show_duels']],
+        ['Duels', 'show_duels']],
     'members': [['Settings', 'menu_settings'],
         ['About', 'menu_about']],
 
