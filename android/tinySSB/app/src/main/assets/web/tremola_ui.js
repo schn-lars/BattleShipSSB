@@ -235,7 +235,7 @@ function menu_settings() {
 }
 
 /*
-*   This method should display the open duels.
+*   This method displays the active/past duels.
 */
 function show_duels() {
     setScenario('duels');
@@ -346,7 +346,7 @@ function show_duels() {
 }
 
 /**
-*   Triggered when you click
+*   Triggered when you click on an instance in duels overview.
 */
 function onDuelButtonClicked(duelString) {
   console.log("Button clicked for: " + JSON.stringify(duelString));

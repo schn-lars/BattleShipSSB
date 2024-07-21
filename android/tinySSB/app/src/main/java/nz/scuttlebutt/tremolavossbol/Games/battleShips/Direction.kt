@@ -26,4 +26,24 @@ enum class Direction(val string: String) {
         }
         return ""
     }
+
+    companion object {
+        fun fromString(s: String): Direction?{
+            when (s) {
+                "U" -> {
+                    return UP
+                }
+                "D" -> {
+                    return DOWN
+                }
+                "L" -> {
+                    return LEFT
+                }
+                "R" -> {
+                    return RIGHT
+                }
+            }
+            return null
+        }
+    }
 }

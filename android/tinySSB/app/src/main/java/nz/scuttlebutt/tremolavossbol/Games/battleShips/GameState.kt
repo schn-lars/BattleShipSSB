@@ -1,8 +1,8 @@
 package nz.scuttlebutt.tremolavossbol.games.battleShips
+import android.util.Log
 
 /**
- * This class represents the current state of the game. It contains
- * no logic and is only for saving.
+ * This class represents the current state of the game.
  *
  * @param shipSizes An array of all the boat sizes
  */
@@ -144,6 +144,9 @@ class GameState(
         }
     }
 
+    /**
+     * Helper-method: splits ship-string (09U28L...) in parts of 3. Each ship in one element.
+     */
     fun splitIntoChunks(input: String, chunkSize: Int): List<String> {
         val chunks = mutableListOf<String>()
         var index = 0
@@ -155,6 +158,10 @@ class GameState(
         return chunks
     }
 
+    /**
+     * This method returns a list of all cells in the game, which are being occupied by the same ship
+     * given as parameters (f.e. 09U) and its length. It is used together with changeHitsToSunken.
+     */
     fun getShipPositions(ship: String, length: Int): List<Position2D> {
         val positions = mutableListOf<Position2D>()
         val x = ship[0].digitToInt()
@@ -172,24 +179,45 @@ class GameState(
         return positions
     }
 
+    /**
+     * This function is being used to update previous hits on the same boat to sunken.
+     * This is needed to visualize the game properly.
+     */
+
     fun changeHitsToSunken(x: Int, y: Int) {
-        val enemyShips = splitIntoChunks(enemyHash ?: "", 3)
-        var iteration = 0
+        try {
+            Log.d("changeHitsToSunken", "Starting changeHitsToSunken with coordinates ($x, $y)")
 
-        while (iteration < enemyShips.size) {
-            val ship = enemyShips[iteration]
-            val shipPositions = getShipPositions(ship, sizes[iteration])
+            // Teilt den enemyHash in 3er Gruppen auf
+            val enemyShips = splitIntoChunks(enemyHash ?: "", 3)
+            Log.d("changeHitsToSunken", "Enemy ships split into chunks: $enemyShips")
 
-            // Prüfen, ob die Position (x, y) zu diesem Schiff gehört
-            if (shipPositions.contains(Position2D(x, y))) {
-                // Aktualisieren der Positionen zu SUNKEN
-                shipPositions.forEach { pos ->
-                    shotsFiredWithOutcome.removeIf { it.first == pos }
-                    shotsFiredWithOutcome.add(Pair(pos, ShotOutcome.SUNKEN))
+            var iteration = 0
+            while (iteration < enemyShips.size) {
+                val ship = enemyShips[iteration]
+                Log.d("changeHitsToSunken", "Processing ship: $ship at iteration $iteration")
+
+                // Ermittelt die Positionen des aktuellen Schiffs
+                val shipPositions = getShipPositions(ship, sizes[iteration])
+                Log.d("changeHitsToSunken", "Ship positions: $shipPositions ${sizes[iteration]}")
+
+                // Prüft, ob die übergebene Position Teil dieses Schiffs ist
+                if (shipPositions.contains(Position2D(x, y))) {
+                    Log.d("changeHitsToSunken", "Position ($x, $y) is part of ship $ship")
+
+                    // Aktualisiert die Positionen des Schiffs auf SUNKEN
+                    shipPositions.forEach { pos ->
+                        shotsFiredWithOutcome.removeIf { it.first == pos }
+                        shotsFiredWithOutcome.add(Pair(pos, ShotOutcome.SUNKEN))
+                        Log.d("changeHitsToSunken", "Updated position $pos to SUNKEN")
+                    }
                 }
+                iteration += 1
             }
-            iteration += 1
+        } catch (e: Exception) {
+            Log.d("changeHitsToSunken", "${e}")
         }
+
     }
 
     /**
@@ -201,27 +229,19 @@ class GameState(
             state.append(it.getPositions()[0].getXPosition())
                 .append(it.getPositions()[0].getYPosition())
                 .append(it.getDirection())
-            //.append("~)
         }
-        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
         state.append("^")
         shotsFiredWithOutcome.forEach {
             state.append(it.first.getXPosition())
                 .append(it.first.getYPosition())
                 .append(it.second)
-                //.append("~")
         }
-        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
         state.append("^")
         shotReceived.forEach {
             state.append(it.first.getXPosition())
                 .append(it.first.getYPosition())
                 .append(it.second)
-                //.append("~")
         }
-        //if (state[state.lastIndex] == '~') state.deleteCharAt(state.lastIndex)
-        //state.append("^")
-            //.append(turn)
         return state.toString()
     }
 
@@ -243,9 +263,7 @@ class GameState(
             state.append(it.getPositions()[0].getXPosition())
                 .append(it.getPositions()[0].getYPosition())
                 .append(it.getDirection())
-                //.append("~")
         }
-        //state.deleteCharAt(state.lastIndexOf("~"))
         return state.toString()
     }
 
@@ -279,5 +297,19 @@ class GameState(
             return "-"
         }
         return result.toString()
+    }
+
+    /**
+     * This method is used for the spectator mode. It replaces the previous ship's of the owner,
+     * with the correct ships, which the owner has sent via DUELACC.
+     */
+    fun overwriteSpectatorOwnerShip(s: String) {
+        val boats = splitIntoChunks(s, 3)
+        var iterations = 0
+        boats.forEach {
+            ships[iterations] = Ship(sizes[iterations], it.substring(0,1).toInt(), it.substring(1,2).toInt(),
+                Direction.fromString(it.substring(2,3))!!
+            )
+        }
     }
 }

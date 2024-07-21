@@ -12,7 +12,8 @@ import java.util.Date
 
 
 /**
- * This class distributes all requests regarding any games.
+ * This class distributes all requests regarding any games. It is the main access class for any games.
+ * GUI elements request GamesHandler to get overview of current/past games of an user.
  */
 class GamesHandler(identity: SSBid) {
     var myId: SSBid = identity
@@ -35,6 +36,9 @@ class GamesHandler(identity: SSBid) {
         return -1
     }
 
+    /*
+    *   Gets triggered after game was stopped in any shape or form.
+     */
     fun decInviteCount(gameType: String): Boolean {
         when (gameType) {
             "BSH" -> {
@@ -48,6 +52,9 @@ class GamesHandler(identity: SSBid) {
         return false
     }
 
+    /**
+     * Gets called after Owner sent an invite himself. Only one game per (owner, peer, game) can be active at a time.
+     */
     fun incInviteCount(gameType: String): Boolean {
         when (gameType) {
             "BSH" -> {
@@ -62,23 +69,7 @@ class GamesHandler(identity: SSBid) {
     }
 
     /**
-     * This function verifies, if a participant can add a new game with the given parameters.
-     * Since we want to use it in public channel, we need to make sure, that there does not
-     * exist any other active game (with the same gametype) between the same players.
-     */
-    fun canCreateNewGame(gameType: String, ownerFid: String, participantFid: String) : Boolean {
-        for (game in instances) {
-            if (participantFid == game.ownerFid && ownerFid == game.ownerFid && gameType == game.toString() && game.isActive() ||
-                participantFid == game.participantFid && ownerFid == game.participantFid && gameType == game.toString() && game.isActive()) {
-                // You have already created a running game with the same player in the same gamemode.
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Returns an instance of a game (if exist) for given parameters.
+     * Returns an instance of any game (if exist) for given parameters.
      */
     fun getInstanceFromFids(gameType: String, oID: String, pID: String, timeStamp: Long): GameInstance? {
         for (game in instances) {
@@ -89,6 +80,9 @@ class GamesHandler(identity: SSBid) {
         return null
     }
 
+    /**
+     * This is only for active games.
+     */
     fun getInstanceFromFids(gameType: String, oID: String, pID: String): GameInstance? {
         for (game in instances) {
             if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType && game.state.isActive()) {
@@ -159,6 +153,9 @@ class GamesHandler(identity: SSBid) {
         }
     }
 
+    /**
+     * This method is being called, when you want to see the gamescreen. It contains the config of it.
+     */
     @JavascriptInterface
     fun getInstanceDescriptorFromFid(gameType: String, oID: String): String {
         val instance: GameInstance? = getInstanceFromFid(gameType, oID)
@@ -208,22 +205,15 @@ class GamesHandler(identity: SSBid) {
         // TODO read out log to retrieve all games
     }
 
-    fun deleteInstanceFromList(instance: GameInstance) {
-        instances.remove(instance)
-    }
-
     private fun addInstanceToList(instance: GameInstance) {
         instances.add(instance)
     }
 
-    fun answerPeerRequest(s: String) {
-        //public_post_game_request(s)
-    }
-
+    /**
+     * Compares public key to my public key.
+     */
     fun isIdEqualToMine(id: String): Boolean {
         Log.d("BSH isEqualToMine", myId.toRef() + " " + id)
         return myId.toRef() == id
     }
-
-
 }

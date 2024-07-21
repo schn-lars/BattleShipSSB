@@ -191,14 +191,12 @@ class BattleshipGame : Game {
     }
 
     /**
-     * Returns the shots you fired along with the outcomes in a list
+     * Returns the shots you fired along with the outcomes in a list. This could be useful for
+     * anti-cheat detection or sending spectators past movements.
      */
     fun shotsFiredWithOutcome(): String {
         return gameState!!.shotsFiredWithOutcomeToString()
     }
-
-
-    // Overwritten functions defined from interface.
 
     override fun toString(): String {
         return "BSH"
@@ -208,13 +206,14 @@ class BattleshipGame : Game {
      * This method registers ACK'd moves of the Owner. This is later useful to spectate a game.
      */
     fun registerSpectatorOwner(x: Int, y: Int, outcome: ShotOutcome) {
-        gameState!!.shotsFiredWithOutcome.add(Pair(Position2D(x,y), outcome))
+        gameState!!.shotOutcome(x,y,outcome)
     }
 
     /**
      * This method registers ACK'd moves of the Peer. This is later useful to spectate a game.
      */
     fun registerSpectatorPeer(x: Int, y: Int, outcome: ShotOutcome) {
-        gameState!!.shotReceived.add(Pair(Position2D(x,y), outcome))
+        //gameState!!.shotReceived.add(Pair(Position2D(x,y), outcome))
+        gameState!!.receiveShot(x,y)
     }
 }

@@ -257,10 +257,6 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                 Log.d("GAM - WebApp", args.toString())
                 //gamesHandler.processGameRequest(s.substring(6))
                 // TODO here you can add restrictions, if a command is not allowed
-                // TODO -> INVACC <OID> <PID> <ADD HASH>
-                val msg = Base64.decode(args[1], Base64.NO_WRAP).decodeToString().split(" ")
-                //Log.d("BSH new msg: ", msg)
-                //args = msg.split(' ')
                 if (args[1] == "BSH") {
                     when (args[2]) {
                         "INV" -> {
@@ -269,11 +265,8 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                                 return
                             }
                             gameHandler.incInviteCount("BSH")
-                            //Log.d("INV Keys", "${gamesHandler.myId.toRef()} ${args[2].slice(1..args[2].lastIndex).removeSuffix(".ed25519")}")
                             gamesHandler.addOwnGame(args[1], args[3], GameStates.INVITED)
                             val inst = gamesHandler.getInstanceFromFid(args[1], args[3])
-                            //gamesHandler.addOwnGame(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"), GameStates.INVITED)
-                            //val inst = gamesHandler.getInstanceFromFid(args[1], args[3].slice(1..args[3].lastIndex).removeSuffix(".ed25519"))
                             (inst!!.game as BattleshipGame).setupGame(true)
                             val req = "${args[1]} INV ${args[3]} ${inst.startTime}"
                             public_post_game_request(Base64.encodeToString(req.toByteArray(), Base64.NO_WRAP))
@@ -302,7 +295,6 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                             } else {
                                 return
                             }
-                            // This means
                             if (inst != null) {
                                 if (!(inst.game as BattleshipGame).gameState!!.isMyTurn()) {
                                     return
@@ -319,6 +311,7 @@ class WebAppInterface(val act: MainActivity, val webView: WebView, val gameHandl
                             val inst = gamesHandler.getInstanceFromFids("BSH", args[3], args[4])
                             if (inst == null || !inst.state.isActive()) { return }
                             inst.state = GameStates.STOPPED
+                            (inst.game as BattleshipGame).gameState!!.turn = false
                             var isPeer: String = ""
                             if (gamesHandler.isIdEqualToMine(args[3])) { // I am owner
                                 isPeer = "0"

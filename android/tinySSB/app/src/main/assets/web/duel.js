@@ -11,35 +11,35 @@ var owner = "-"
 var peer = "-"
 var game = "-"
 
-
-
+/*
+*   This method opens the selection menu for possible games needed in order to send an invite.
+*/
 function duel_openDuels() {
-    closeOverlay(); // Schließe andere Overlays
-
+    closeOverlay();
     var duelInviteContainer = document.getElementById('duelInviteContainer');
     if (duelInviteContainer) {
-        duelInviteContainer.style.display = 'block'; // Overlay sichtbar machen
+        duelInviteContainer.style.display = 'block';
     } else {
         console.error('Duel-Invite-Container not found!');
     }
 }
 
-// Beispielhafte Funktionen für Duell-Interaktionen
+/**
+*   This method gets called if you click on an icon in the invitemenu.
+*/
 function inviteForDuel(gameType) {
-    // Logik für den Start eines Duells
     closeDuelOverlay();
-    //var stringToEncode = "GAM_BSH_INV_" + myId;
     var stringToEncode = "BSH INV " + myId;
     console.log('Invited battleship', JSON.stringify(stringToEncode))
-    //var encodedString = btoa(stringToEncode);
-    //backend("publ:post [] "+ encodedString + " null");
     backend("games "+ stringToEncode);
 }
 
+/**
+*   This function closes the invitemenu. It gets called by the Cancel-Button.
+*/
 function closeDuelOverlay() {
     var duelInviteContainer = document.getElementById('duelInviteContainer');
     if (duelInviteContainer) {
-        //duelInviteContainer.parentNode.removeChild(duelInviteContainer);
         duelInviteContainer.style.display = 'none';
     }
 }
@@ -66,9 +66,11 @@ function update_game_gui(response) {
             } else {
                 instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer, battleship_timestamp)
             }
+
             console.log("BSH update_gui ", JSON.stringify(instanceDescriptor))
             var instanceList = instanceDescriptor.split(" ")
             battleship_status = instanceList[4]
+            battleship_timestamp = instanceList[3]
             if (instanceList.length < 6) { return }
             var playerTurn = instanceList[5]
             if (playerTurn == "1") {
@@ -97,14 +99,14 @@ function battleships(turn, ships_fired_recv) {
     c.innerHTML = "<div style='text-align: center; color: Blue;'><font size=+2><strong>Battleships</strong></font></div>";
 
     battleships_load_config(battleship_status, args[0], args[1], args[2]);
-    //battleships_show_turn()
 }
 
 /**
 *   This function is called if a user wants to quit the game.
 */
-function quit_bsh() {// TODO add owner and peer
+function quit_bsh() {
     backend("games BSH DUELQUIT " + owner + " " + peer);
+    reset_battleship_mode();
     show_duels()
 }
 
@@ -170,29 +172,7 @@ function battleships_set_turn(is_turn) {
 
 // Hides everything below the two grids
 function battleships_hide_controls() {
-    document.getElementById("battleships:invite").style.display = "none"
-    document.getElementById("battleships:invited").style.display = "none"
-    document.getElementById("battleships:waiting").style.display = "none"
-    document.getElementById("battleships:placer").style.display = "none"
     document.getElementById("battleships:turn").style.display = "none"
-}
-
-// Shows the invite button below the grid
-function battleships_show_invite_button() {
-    battleships_hide_controls()
-    document.getElementById("battleships:invite").style.display = null
-}
-
-// Shows the accept button below the grid
-function battleships_show_invited_button() {
-    battleships_hide_controls()
-    document.getElementById("battleships:invited").style.display = null
-}
-
-// Shows the waiting text field below the grid
-function battleships_show_waiting() {
-    battleships_hide_controls()
-    document.getElementById("battleships:waiting").style.display = null
 }
 
 // Shows the turn indicator below the grid
@@ -377,7 +357,6 @@ function battleships_load_config(state, ships, deliv, recv) {
         battleships_show_turn()
         return
     }
-    //battleships_set_turn(config_split[4] === "true")
     battleships_show_turn()
 }
 

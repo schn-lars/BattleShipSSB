@@ -867,7 +867,7 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         // console.log('e=', JSON.stringify(e))
         b2f_new_event(e)
         console.log(e)
-    } else if (cmdStr[0] == 'games') {
+    } else if (cmdStr[0] == 'games') { // Games Addon
         var draft = atob(cmdStr[1])
         cmdStr.splice(0, 1)
         console.log("GAM CMD-STRING", cmdStr)
