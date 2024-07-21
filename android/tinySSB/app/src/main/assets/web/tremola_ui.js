@@ -242,7 +242,7 @@ function show_duels() {
     var c = document.getElementById("conversationTitle");
     c.style.display = null;
 
-    c.innerHTML = "<div style='text-align: center;'><font size=+3><strong>Duels</strong></font></div>";
+    c.innerHTML = "<div style='text-align: center;'><font size=+2><strong>Duels</strong></font></div>";
     var container = document.getElementById("duels-container");
     container.innerHTML = "";
 
