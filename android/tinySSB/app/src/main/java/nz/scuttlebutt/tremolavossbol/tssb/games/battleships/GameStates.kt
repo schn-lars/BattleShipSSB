@@ -17,6 +17,6 @@ enum class GameStates(val string: String) {
      * This method returns, whether a given GameInstance is still ongoing.
      */
     fun isActive(): Boolean {
-        return (this == RUNNING || this == INVITED || this == WAITING)
+        return (this == RUNNING || this == INVITED || this == WAITING || this == SPEC)
     }
 }

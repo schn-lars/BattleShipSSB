@@ -1229,12 +1229,15 @@ function b2f_new_event(e) { // incoming SSB log event: we get map with three ent
         // TODO autoretransmit answer if necessary
             if (window.GamesHandler && typeof window.GamesHandler.onGameBackendEvent === 'function') {
                 var response = window.GamesHandler.onGameBackendEvent(e.public[1]);
-                if (response != "") {
+                var responseList = response.split("!CERBERUS!")
+                if (responseList.length >= 1 && responseList[0].startsWith("games")) {
                     // TODO anpassen von GUI
-                    backend(response);
+                    backend(responseList[0]);
                 }
-                if (curr_scenario == "battleships") {
-                    update_game_gui()
+                if (responseList.length == 2) {
+                    update_game_gui(responseList[1])
+                } else {
+                    update_game_gui(responseList[0])
                 }
             } else {
                 console.error("GamesHandler.onGameBackendEvent is not a function");
