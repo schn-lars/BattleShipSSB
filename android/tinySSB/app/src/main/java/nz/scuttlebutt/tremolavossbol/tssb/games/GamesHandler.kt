@@ -82,7 +82,7 @@ class GamesHandler(identity: SSBid) {
      */
     fun getInstanceFromFids(gameType: String, oID: String, pID: String): GameInstance? {
         for (game in instances) {
-            if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType) {
+            if (game.ownerFid == oID && game.participantFid == pID && game.game.toString() == gameType && game.state.isActive()) {
                 return game
             }
         }
@@ -143,6 +143,16 @@ class GamesHandler(identity: SSBid) {
     @JavascriptInterface
     fun getInstanceDescriptorFromFids(gameType: String, oID: String, pID: String): String {
         val instance: GameInstance? = getInstanceFromFids(gameType, oID, pID)
+        if (instance == null) {
+            return ""
+        } else {
+            return getInstanceDescriptor(instance)
+        }
+    }
+
+    @JavascriptInterface
+    fun getInstanceDescriptorFromFid(gameType: String, oID: String): String {
+        val instance: GameInstance? = getInstanceFromFid(gameType, oID)
         if (instance == null) {
             return ""
         } else {

@@ -4,11 +4,11 @@ var battleships_turn = false
 var battleships_horizontal = true
 var battleships_ship_positions = ""
 var battleship_ship_lengths = [2] // [2, 3, 3, 4 ,5]
-var battleship_status = "stopped"
+var battleship_status = "STOPPED"
 
-var owner = ""
-var peer = ""
-var game = ""
+var owner = "-"
+var peer = "-"
+var game = "-"
 
 
 
@@ -45,19 +45,39 @@ function closeDuelOverlay() {
 
 // ---------- GAME-SCREEN -----------
 
-function update_game_gui() {
-    console.log("BSH updating GUI ...")
-    if (window.GamesHandler && typeof window.GamesHandler.getInstanceDescriptorFromFids === 'function') {
-        var instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer)
-        console.log("BSH update_gui ", JSON.stringify(instanceDescriptor))
-        var instanceList = instanceDescriptor.split(" ")
-        if (instanceList.length < 6) { return }
-        var playerTurn = instanceList[5]
-        if (playerTurn == "1") {
-            battleships(true, instanceList[6])
-        } else {
-            battleships(false, instanceList[6])
+function update_game_gui(response) {
+    console.log("BSH updating GUI ...", JSON.stringify(response))
+    if (curr_scenario == 'battleships') {
+        if (window.GamesHandler && typeof window.GamesHandler.getInstanceDescriptorFromFids === 'function' && typeof window.GamesHandler.getInstanceDescriptorFromFid === 'function') {
+            var instanceDescriptor = ""
+            var responseList = response.split(" ")
+            console.log("BSH updating GUI after split")
+            if (responseList.length > 1) {
+                console.log("BSH updating GUI > 1")
+                if (owner == responseList[0] && peer == "-" && battleship_status == "INVITED") {
+                    console.log("BSH updating GUI setting peer")
+                    peer = responseList[1]
+                }
+            }
+            console.log("BSH updating GUI before instanceDescriptor")
+            if (peer == "-") {
+                instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFid(game, owner)
+            } else {
+                instanceDescriptor = window.GamesHandler.getInstanceDescriptorFromFids(game, owner, peer)
+            }
+            console.log("BSH update_gui ", JSON.stringify(instanceDescriptor))
+            var instanceList = instanceDescriptor.split(" ")
+            battleship_status = instanceList[4]
+            if (instanceList.length < 6) { return }
+            var playerTurn = instanceList[5]
+            if (playerTurn == "1") {
+                battleships(true, instanceList[6])
+            } else {
+                battleships(false, instanceList[6])
+            }
         }
+    } else if (curr_scenario == 'duels') {
+        show_duels()
     }
 }
 
@@ -84,6 +104,7 @@ function battleships(turn, ships_fired_recv) {
 */
 function quit_bsh() {// TODO add owner and peer
     backend("games BSH DUELQUIT " + owner + " " + peer);
+    show_duels()
 }
 
 
@@ -97,6 +118,7 @@ function battleship_bottom_field_click(i) {
     } else {
         backend("games BSH SHOT " + owner + " " + peer + " " + (((i % 10) + 9) % 10) + "" + Math.floor((i - 1) / 10))
         battleships_set_turn(false)
+        battleships_show_turn()
     }
     square.childNodes[0].className = "hole field_clicked"
     setTimeout(function () {
@@ -192,15 +214,12 @@ function battleships_show_turn() {
             turn.classList.add('turn-lost');
         } else if (battleship_status == "STOPPED") {
             turn.innerHTML = "The game is stopped!";
-            turn.classList.add('turn-default');
         } else if (battleship_status == "INVITED") {
             console.log("BSH invite-button init ...")
             turn.innerHTML = "Waiting for other!"
-            turn.classList.add('turn-default');
         } else if (battleship_status == "WAITING") {
             if (peerId == "-") {
                 turn.innerHTML = "Waiting ...";
-                turn.classList.add('turn-default');
             }
         } else if (battleship_status == "RUNNING") {
             if (battleships_turn) {
@@ -232,7 +251,6 @@ function battleships_show_turn() {
             } else {
                 turn.innerHTML = "Peer's Turn!";
             }
-            turn.classList.add('turn-default');
         }
     }
 }
@@ -361,8 +379,8 @@ function reset_battleship_mode() {
     battleships_turn = null
     battleships_ship_positions = ""
     battleship_status = "STOPPED"
-    game = ""
+    game = "-"
 
-    owner = ""
-    peer = ""
+    owner = "-"
+    peer = "-"
 }
