@@ -210,7 +210,7 @@ function battleships_show_turn() {
     turn.style.fontSize = '1.3em';
     turn.style.padding = '15px';
     turn.style.marginTop = '10px';
-    turn.style.border = 'none';
+    turn.style.border = '1px solid #000';
     turn.style.borderRadius = '15px';
     turn.style.backgroundColor = '#50A4D3';
     turn.style.color = '#fff';
